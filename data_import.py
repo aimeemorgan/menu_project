@@ -4,7 +4,7 @@ import datetime
 
 
 def load_menus_and_restaurants(session):
-    with open('./ref_docs/menu_test') as csvfile:
+    with open('./ref_docs/Menu.csv') as csvfile:
         menureader = csv.reader(csvfile, delimiter=",")
         rest_id = 1
         for row in menureader:  # format date
@@ -32,47 +32,61 @@ def load_menus_and_restaurants(session):
 
 
 def load_items(session):
-    with open('./ref_docs/dishes_test.csv') as csvfile:
+    with open('./ref_docs/Dish.csv') as csvfile:
         itemreader = csv.reader(csvfile, delimiter=",")
         for row in itemreader:
+            print row[1]
+            first_year = None
+            latest_year = None
+            if row[5] != '0':
+                first_year = datetime.date(int(row[5]), 1, 1)
+            if row[6] != '0':
+                latest_year = datetime.date(int(row[6]), 1, 1)
+            low_price = None
+            high_price = None
+            if row[7] != '':
+                low_price=float(row[7])
+            if row[8] != '':
+                high_price=float(row[8])
+
             new_item = model.Item(id=int(row[0]),
                                   description=row[1].strip("\"").title(),
-                                  first_year=datetime.date(int(row[5]), 1, 1),
-                                  latest_year=datetime.date(int(row[6]), 1, 1),
-                                  low_price=float(row[7]),
-                                  high_price=float(row[8]))
+                                  first_year=first_year,
+                                  latest_year=latest_year,
+                                  low_price=low_price,
+                                  high_price=high_price)
             session.add(new_item)
             session.commit()
 
 
 def load_menuitems(session):
-    ##### read menupages csv and create a dictionary w menu page IDs as keys, and menu IDs as values
-    #### them get penu page IDs while reading the menuitems csv below, use it to look up the menu ID
-    ### and feed it into the database as a argument below
-
-    # build menu_page_id to menu_id dictionary
-    with open ('./ref_docs/MenuPage.csv') as csvfile:
+    with open('./ref_docs/MenuPage.csv') as csvfile:
         menu_ids = {}
         itemreader = csv.reader(csvfile, delimiter=",")
         for row in itemreader:
-            menu_ids[row[0]] = menu_ids[1]
-
-    with open('./ref_docs/menuitem_test.csv') as csvfile:
+            menu_ids[row[0]] = row[1]
+    print menu_ids['1389']
+    with open('./ref_docs/MenuItem.csv') as csvfile:
         itemreader = csv.reader(csvfile, delimiter=",")
         for row in itemreader:
+            if row[2]:
+                price = float(row[2])
+            else:
+                price = None
             menu_id = menu_ids[row[1]]
-            new_menuitem = model.menuitems(id=int(row[0]),
-                                  item_id=row[4],
-                                  menu_id=menu_id,
-                                  price=float(row[2]))
+            new_menuitem = model.MenuItem(id=int(row[0]),
+                                        items_id=int(row[4]),
+                                        menu_id=int(menu_id),
+                                        price=price)
             session.add(new_menuitem)
             session.commit()
 
 
 def main(session):
-    # You'll call each of the load_* functions with the session as an argument
     #load_menus_and_restaurants(session)
     load_items(session)
+    #load_menuitems(session)
+
 
 if __name__ == "__main__":
     s = model.session

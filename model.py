@@ -21,7 +21,7 @@ class Restaurant(Base):
     name = Column(String(256), nullable=False)
     location = Column(String(256))
 
-    # menus = relationship("Menu,", backref=backref("menus"))
+    #menus = relationship("Menu,", backref=backref("menus"))
 
 
 class Menu(Base):
@@ -30,34 +30,31 @@ class Menu(Base):
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=True)
     restaurant_id = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
-    currency = Column(String(32), nullable=True)
-    occasion = Column(String(256), nullable=True)
-    sponsor = Column(String(256))
+    currency = Column(String, nullable=True)
+    occasion = Column(String, nullable=True)
+    sponsor = Column(String)
 
-    # restaurant = relationship("Restaurant", backref=backref("restaurants"))
+    #restaurant = relationship("Restaurant", backref=backref("restaurants"))
 
 
 class Item(Base):
     __tablename__ = "items"
 
     id = Column(Integer, primary_key=True)
-    description = Column(String(512), nullable=False)
+    description = Column(String, nullable=False)
     first_year = Column(DateTime, nullable=True)
     latest_year = Column(DateTime, nullable=True)
     low_price = Column(Float, nullable=True)
     high_price = Column(Float, nullable=True)
 
 
-class MenuItems(Base):
+class MenuItem(Base):
     __tablename__ = "menuitems"
 
     id = Column(Integer, primary_key=True)
     menu_id = Column(Integer, ForeignKey('menus.id'), nullable=False)
-    item_id = Column(Integer, ForeignKey('items.id'), nullable=False)
+    items_id = Column(Integer, ForeignKey('items.id'), nullable=False)
     price = Column(Float, nullable=True)
-
-
-
 
 
 
