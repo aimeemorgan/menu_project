@@ -21,8 +21,6 @@ class Restaurant(Base):
     name = Column(String(256), nullable=False)
     location = Column(String(256))
 
-    #menus = relationship("Menu,", backref=backref("menus"))
-
 
 class Menu(Base):
     __tablename__ = "menus"
@@ -34,10 +32,11 @@ class Menu(Base):
     occasion = Column(String, nullable=True)
     sponsor = Column(String)
 
-    #restaurant = relationship("Restaurant", backref=backref("restaurants"))
+    restaurant = relationship("Restaurant", backref=backref("menus"))
+    items = relationship("MenuItem", backref=backref("menus"))
 
 
-class Item(Base):
+class Item(Base): 
     __tablename__ = "items"
 
     id = Column(Integer, primary_key=True)
@@ -47,15 +46,19 @@ class Item(Base):
     low_price = Column(Float, nullable=True)
     high_price = Column(Float, nullable=True)
 
+    menus = relationship("MenuItem", backref=backref("items"))
+
 
 class MenuItem(Base):
     __tablename__ = "menuitems"
 
     id = Column(Integer, primary_key=True)
     menu_id = Column(Integer, ForeignKey('menus.id'), nullable=False)
-    items_id = Column(Integer, ForeignKey('items.id'), nullable=False)
+    item_id = Column(Integer, ForeignKey('items.id'), nullable=False)
     price = Column(Float, nullable=True)
 
+    item = relationship("Item", backref=backref("menuitem"))
+    menu = relationship("Menu", backref=backref("menuitem"))
 
 
 ### End class declarations

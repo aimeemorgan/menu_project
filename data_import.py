@@ -59,31 +59,37 @@ def load_items(session):
             session.commit()
 
 
-def load_menuitems(session):
-    with open('./ref_docs/MenuPage.csv') as csvfile:
-        menu_ids = {}
-        itemreader = csv.reader(csvfile, delimiter=",")
-        for row in itemreader:
-            menu_ids[row[0]] = row[1]
-    print menu_ids['1389']
-    with open('./ref_docs/MenuItem.csv') as csvfile:
-        itemreader = csv.reader(csvfile, delimiter=",")
-        for row in itemreader:
-            if row[2]:
-                price = float(row[2])
-            else:
-                price = None
-            menu_id = menu_ids[row[1]]
-            new_menuitem = model.MenuItem(id=int(row[0]),
-                                        items_id=int(row[4]),
-                                        menu_id=int(menu_id),
-                                        price=price)
-            session.add(new_menuitem)
-            session.commit()
+### screw this! learned that I can bulk load a CSV file into postgres
+### via COPY. see menuitems_import.py!
+# def load_menuitems(session):
+#     with open('./ref_docs/MenuPage.csv') as csvfile:
+#         menu_ids = {}
+#         itemreader = csv.reader(csvfile, delimiter=",")
+#         for row in itemreader:
+#             menu_ids[row[0]] = row[1]
+#     with open('./ref_docs/MenuItem.csv') as csvfile:
+#         itemreader = csv.reader(csvfile, delimiter=",")
+#         for row in itemreader:
+#             if row[2]:
+#                 price = float(row[2]
+)#             else
+:#                 price = None
+#             menu_id = menu_ids[row[1]]
+#             new_menuitem = model.MenuItem(id=int(row[0]),
+#                                         items_id=int(row[4]),
+#                                         menu_id=int(menu_id),
+#                                         price=price)
+#             session.add(new_menuitem)
+#             session.commit()
 
+# CREATE TABLE menuitems 
+#(ID integer, MENU_ID integer, PRICE float, ITEM_ID integer);
+
+
+#COPY menuitems from '/home/alm/src/hackbright_project/ref_docs/menuitems.csv' DELIMITERS ',' CSV;
 
 def main(session):
-    #load_menus_and_restaurants(session)
+    load_menus_and_restaurants(session)
     load_items(session)
     #load_menuitems(session)
 
