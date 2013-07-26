@@ -1,12 +1,6 @@
 import model
 
 
-def restaurant_merge():
-# identify duplicate restaurants in Restaurants and merge them into 
-# single records
-    pass
-
-
 def classify_dishes():
 # classify dishes
     pass

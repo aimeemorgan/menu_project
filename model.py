@@ -12,7 +12,7 @@ Base = declarative_base()
 Base.query = session.query_property()
 
 ### Class declarations go here 
-
+# restaurant = session.query(Restaurant).get(12882)
 
 class Restaurant(Base):
     __tablename__ = "restaurants"
@@ -21,6 +21,12 @@ class Restaurant(Base):
     name = Column(String(256), nullable=False)
     location = Column(String(256))
 
+    menus = relationship("Menu", backref=backref("restaurant"))
+
+    def __repr__(self):
+        return '<Retsaurant: %s>' % (self.name)
+
+    # def show_menus(self):
 
 class Menu(Base):
     __tablename__ = "menus"
@@ -32,9 +38,12 @@ class Menu(Base):
     occasion = Column(String, nullable=True)
     sponsor = Column(String)
 
-    restaurant = relationship("Restaurant", backref=backref("menus"))
     items = relationship("MenuItem", backref=backref("menus"))
 
+    def __repr__(self):
+        return '<Menu: %s, %s>' % (self.restaurant.name, self.date)
+
+    # def show_items(self):
 
 class Item(Base): 
     __tablename__ = "items"
@@ -47,6 +56,12 @@ class Item(Base):
     high_price = Column(Float, nullable=True)
 
     menus = relationship("MenuItem", backref=backref("items"))
+
+    def __repr__(self):
+        return '<Item: %s>' % (self.description)
+
+    # def show_menus(self):
+    # def show_restaurants(self):
 
 
 class MenuItem(Base):
