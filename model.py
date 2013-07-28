@@ -1,8 +1,9 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Float, create_engine, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref, scoped_session
+import datetime
 
-engine = create_engine('postgresql+psycopg2://alm:password@localhost/nyplmenus')
+engine = create_engine('postgresql+psycopg2://alm:password@localhost/menus')
 # for heroku deploy, will need to modify this to point to DATABASE_URL.
 
 session = scoped_session(sessionmaker(bind=engine,
@@ -96,6 +97,12 @@ class MenuItem(Base):
 
 
 ### End class declarations
+
+
+def find_restaurant_by_name(name):
+    restaurant = session.query(Restaurant).filter(Restaurant.name.like('%' + name + '%')).all()
+    return restaurant
+
 
 def main():
     pass

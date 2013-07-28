@@ -1,0 +1,8 @@
+POULTRY = []
+MEAT = []
+SEAFOOD = []
+BREAKFAST = []
+VEGETABLES = []
+FRUIT = []
+PASTA = []
+BEVERAGES = []
