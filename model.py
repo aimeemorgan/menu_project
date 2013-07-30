@@ -26,7 +26,9 @@ class Restaurant(Base):
     menus = relationship("Menu", backref=backref("restaurant"))
 
     def __repr__(self):
-        return '<Restaurant: %s. Location: %s>' % (self.name, self.location)
+        name = self.name.encode('utf-8')
+        location = self.name.encode('utf-8')
+        return '<Restaurant: %s. Location: %s>' % (name, location)
 
     def show_menus(self):
         print "Menus from %s:" % (self.name)
@@ -69,8 +71,8 @@ class Item(Base):
     menus = relationship("MenuItem", backref=backref("items"))
 
     def __repr__(self):
-        return '<Item: %s>' % (self.description)
-
+        description = self.description.encode('utf-8')
+        return '<Item: %s>' % description
 
     def show_menus(self):
         print "Menus on which %s appears:" % (self.description)
@@ -102,6 +104,11 @@ class MenuItem(Base):
 def find_restaurant_by_name(name):
     restaurant = session.query(Restaurant).filter(Restaurant.name.like('%' + name + '%')).all()
     return restaurant
+
+
+def find_dish(keyword):
+    dish = session.query(Item).filter(Item.description.like('%' + keyword + '%')).all()
+    return dish
 
 
 def main():

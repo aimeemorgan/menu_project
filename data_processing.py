@@ -48,7 +48,7 @@ def word_frequency(num):
 
 
 def cluster_dishes(corpora):
-# cluster similar dishes
+# cluster similar dishes [using fuzzy search?]
     pass
 
 
@@ -66,6 +66,23 @@ def find_techniques(corpora):
     pass
 
 
+def id_fancy_foods(corpora):
+    pass
+
+
+def id_venue(restaurant):
+# identify "restaurants" that are actually ships, railroad cars, etc.
+# look for "on board", "en route", "S.S.", etc.
+    pass
+
+
+def id_meal_part(dish):
+# is this dish an entree? a side dish? dessert? breakfast? beverage? salad?
+# soup? attempt to implement w/ supervised classification -- go through subset
+# of dish descriptions, create a training set?
+    pass
+
+
 ###########################################
 # postprocessing
 
@@ -75,7 +92,7 @@ def find_techniques(corpora):
 ###########################################
 
 
-# search functions
+# helper functions
 
 def find_unclassified(category):
 # find dishes that lack a classification term for a given
@@ -94,6 +111,9 @@ def count_menus_by_year(year):
     menu_list = find_menus_by_year(year)
     return len(menu_list)
 
+def count_menus_by_decade(decade):
+    pass
+
 
 def find_similar_restaurant(restaurant):
 # find restaurants similar to input restaurant based on comparison of dishes
@@ -103,4 +123,12 @@ def find_similar_restaurant(restaurant):
 def dish_frequency(dish):
 # calculate how frequently a dish (or category of dishes?) appears relative
 # to total number of dishes for that year
+    pass
+
+
+def count_items(menu):
+    pass
+
+def find_similar_dishes(dish, num):
+# return a list of <num> dishes that are most similar to <dish>
     pass

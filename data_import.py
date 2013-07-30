@@ -7,13 +7,13 @@ def load_menus_and_restaurants(session):
     with open('./ref_docs/Menu.csv') as csvfile:
         menureader = csv.reader(csvfile, delimiter=",")
         rest_id = 1
-        for row in menureader:  # format date
+        for row in menureader:  
             new_restaurant = model.Restaurant(name=row[13],
                                             location=row[5].title().strip(";"),
                                             id=rest_id)
             session.add(new_restaurant)
             session.commit()
-            if row[12] != '':
+            if row[12] != '':  # format date
                 date_args = row[12].split('-')
                 date = datetime.date(int(date_args[0]),
                                      int(date_args[1]),
@@ -35,10 +35,9 @@ def load_items(session):
     with open('./ref_docs/Dish.csv') as csvfile:
         itemreader = csv.reader(csvfile, delimiter=",")
         for row in itemreader:
-            print row[1]
-            first_year = None
+            first_year = None  # format dates
             latest_year = None
-            if row[5] != '0':
+            if row[5] != '0':  
                 first_year = datetime.date(int(row[5]), 1, 1)
             if row[6] != '0':
                 latest_year = datetime.date(int(row[6]), 1, 1)
@@ -83,10 +82,10 @@ def load_items(session):
 #             session.commit()
 
 # CREATE TABLE menuitems 
-#(ID integer, MENU_ID integer, PRICE float, ITEM_ID integer);
+# (ID integer, MENU_ID integer, PRICE float, ITEM_ID integer);
 
 
-#COPY menuitems from '/home/alm/src/hackbright_project/ref_docs/menuitems.csv' DELIMITERS ',' CSV;
+# COPY menuitems from '/home/alm/src/hackbright_project/ref_docs/menuitems.csv' DELIMITERS ',' CSV;
 
 def main(session):
     load_menus_and_restaurants(session)

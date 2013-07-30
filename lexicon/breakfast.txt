@@ -1,0 +1,11 @@
+eggs
+omelette
+omelet
+cereal
+muffin
+bagel
+scone
+pancake
+oatmeal
+cornflakes
+
