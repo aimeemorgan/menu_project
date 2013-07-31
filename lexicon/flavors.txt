@@ -10,9 +10,7 @@ Wasabi
 chili
 cayenne
 spicy
-
 [condiments?]
-
 ketchup
 catsup
 mustard

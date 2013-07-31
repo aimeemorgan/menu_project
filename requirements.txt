@@ -6,6 +6,7 @@ PyYAML==3.10
 SQLAlchemy==0.8.2
 Werkzeug==0.9.3
 argparse==1.2.1
+-e git://github.com/seatgeek/fuzzywuzzy.git@1ab66a3d70e18e754f6760a34acacafebcffecad#egg=fuzzywuzzy-master
 itsdangerous==0.22
 nltk==2.0.4
 psycopg2==2.5.1

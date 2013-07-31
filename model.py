@@ -55,8 +55,6 @@ class Menu(Base):
         for item in self.items:
             print item.item.description
 
-    # menu count by year/decade?
-    # menu list by year/decade?
 
 class Item(Base): 
     __tablename__ = "items"
@@ -76,13 +74,13 @@ class Item(Base):
 
     def show_menus(self):
         print "Menus on which %s appears:" % (self.description)
-        for menu in item.menus:
+        for menu in self.menus:
             print "%s, %s" % (menu.menu.restaurant.name, menu.menu.date)
 
 
     def show_restaurants(self):
         print "Restaurants which serve %s:" % (self.description)
-        for menu in item.menus:
+        for menu in self.menus:
             print menu.menu.restaurant.name
 
 

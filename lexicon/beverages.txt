@@ -1,0 +1,17 @@
+coffee
+tea
+soda
+Coke
+Cola
+Pepsi
+wine
+beer
+ale
+milk
+juice
+vodka
+rum
+whisky
+whiskey
+gin
+

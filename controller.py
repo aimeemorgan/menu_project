@@ -41,3 +41,7 @@ def count_items(menu):
 def find_similar_dishes(dish, num):
 # return a list of <num> dishes that are most similar to <dish>
     pass
+
+def find_random(input):
+# return a random restaurant, dish, or item (based on input)
+    pass

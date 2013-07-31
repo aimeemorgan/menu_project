@@ -6,22 +6,22 @@ import model
 #and the values a list of id numbers of duplicate rows
 
 
-def restaurant_id_mapping():
-# !!!query to get all Restaurant objects from restaurant table
-# !!!return as restaurant_list]
-    restaurant_names = {}
-    id_mapping = {}
-    for restaurant in restaurant_list:
-        if not (restaurant.name in restaurant_names):   # restaurant is NOT a dup
-            restaurant_names[restaurant.name] = restaurant.id
-            id_mapping[restaurant.id] = []
-        else:  # restaurant IS a dup
-            canonical_id = restaurant_names[restaurant.name]
-        id_mapping[cannonical_id].append(restaurant.id)
-    return id_mapping
+# def restaurant_id_mapping():
+# # !!!query to get all Restaurant objects from restaurant table
+# # !!!return as restaurant_list]
+#     restaurant_names = {}
+#     id_mapping = {}
+#     for restaurant in restaurant_list:
+#         if not (restaurant.name in restaurant_names):   # restaurant is NOT a dup
+#             restaurant_names[restaurant.name] = restaurant.id
+#             id_mapping[restaurant.id] = []
+#         else:  # restaurant IS a dup
+#             canonical_id = restaurant_names[restaurant.name]
+#         id_mapping[cannonical_id].append(restaurant.id)
+#     return id_mapping
 
 
-def menu_table_replace(id_mapping):
+# def menu_table_replace(id_mapping):
 # id mapping needs to be iterator, yes?
 # for each key(id) in id_mapping:
 #       new_id = id
@@ -32,7 +32,7 @@ def menu_table_replace(id_mapping):
 #             replace id with new_id
 
          
-def restaurant_table_id_replace(id_mapping):
+# def restaurant_table_id_replace(id_mapping):
 # id mapping needs to be iterator, yes?
 # for each key(id) in id_mapping:
 #       new_id = id
@@ -42,7 +42,7 @@ def restaurant_table_id_replace(id_mapping):
 #        for each row found:
 #             replace id with new_id
 
-def delete_restaurant_dups(id_mapping):
+# def delete_restaurant_dups(id_mapping):
 # for each key(id) in id_mapping:
 #      get value(=list of ids)
 #     for each id in value:
@@ -58,3 +58,9 @@ def delete_restaurant_dups(id_mapping):
 # WHERE P1.id > P2.id
 #    AND P1.merchant_id = P2.merchant_id
 #    AND P1.url = P2.url;
+
+
+seasons = model.find_restaurant_by_name('Four Seasons')
+for restaurant in seasons:
+    print restaurant.id
+    print restaurant.show_menus()
