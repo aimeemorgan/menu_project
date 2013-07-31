@@ -30,10 +30,16 @@ class Restaurant(Base):
         location = self.name.encode('utf-8')
         return '<Restaurant: %s. Location: %s>' % (name, location)
 
-    def show_menus(self):
+    def get_menus(self):
         print "Menus from %s:" % (self.name)
         for menu in self.menus:
             print menu.date
+
+    def earliest_menu_date(self):
+        pass
+
+    def latest_menu_date(self):
+        pass
 
 class Menu(Base):
     __tablename__ = "menus"
@@ -50,10 +56,15 @@ class Menu(Base):
     def __repr__(self):
         return '<Menu: %s, %s>' % (self.restaurant.name, self.date)
 
-    def show_items(self):
+
+    def get_items(self):
         print  "Menu: %s, %s:" % (self.restaurant.name, self.date)
         for item in self.items:
             print item.item.description
+
+
+    def count_items(self):
+        return len(self.items)
 
 
 class Item(Base): 
@@ -72,16 +83,21 @@ class Item(Base):
         description = self.description.encode('utf-8')
         return '<Item: %s>' % description
 
-    def show_menus(self):
+    def get_menus(self):
         print "Menus on which %s appears:" % (self.description)
         for menu in self.menus:
             print "%s, %s" % (menu.menu.restaurant.name, menu.menu.date)
 
 
-    def show_restaurants(self):
+    # def count_menus(self):
+
+
+    def get_restaurants(self):
         print "Restaurants which serve %s:" % (self.description)
         for menu in self.menus:
             print menu.menu.restaurant.name
+
+    # def count_restaurants(self):
 
 
 class MenuItem(Base):
@@ -97,16 +113,6 @@ class MenuItem(Base):
 
 
 ### End class declarations
-
-
-def find_restaurant_by_name(name):
-    restaurant = session.query(Restaurant).filter(Restaurant.name.like('%' + name + '%')).all()
-    return restaurant
-
-
-def find_dish(keyword):
-    dish = session.query(Item).filter(Item.description.like('%' + keyword + '%')).all()
-    return dish
 
 
 def main():
