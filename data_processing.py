@@ -1,5 +1,6 @@
 import model
 import nltk
+from nltk.corpus import stopwords
 from lexicon import lexicon_names, lexicon_setup
 from datetime import datetime 
 from fuzzywuzzy import fuzz
@@ -9,7 +10,7 @@ from fuzzywuzzy import process
 # preprocessing
 
 def build_dish_corpus():
-# build a dictionary where key is item.id, value is item.description
+# builds a dictionary where key is item.id, value is item.description
 # as a tokenized list. lowercase/strip punctuation.
     dish_list = model.session.query(model.Item).all()
     dish_corpus = {}
@@ -21,16 +22,19 @@ def build_dish_corpus():
 
 
 def build_menu_corpus():  # what am I actually planning to use this for?
-# build a dictionary where key is menu.id, value is tokenized list
+# ngrams? collocations?
+# builds a dictionary where key is menu.id, value is tokenized list
 # with text of item.descriptions for all items that appear on menu.
 # lowercase/strip punctuation
     menu_list = model.session.query(model.Menu).all()
     menu_corpus = {}
     for menu in menu_list:
+        tokens = []
         for item in menu.items:
             if item.item:
                 text = (item.item.description).lower().strip() + '. '
-                tokens = nltk.word_tokenize(text)
+                new_tokens = nltk.word_tokenize(text)
+                tokens.append(new_tokens)
         menu_corpus[menu.id] = tokens
     return menu_corpus
 
@@ -38,15 +42,21 @@ def build_menu_corpus():  # what am I actually planning to use this for?
 def strip_prepositional_phrases(corpus):
 # strip out prepositional phrases as pre-classification step
 # (i.e. "with...", "in..." "accompanied by...")
-    for id, tokens in corpus:
-        for i in len(tokens):
+    for id, tokens in corpus.items():
+        for i in range(len(tokens)):
             if tokens[i] in ['of', 'from', 'in', 'with', 'accompanied']:
                 tokens = tokens[0:(i-1)]
 
 
-def strip_stopwords():
+def strip_stopwords(corpus):
 # take a corpus, remove stopwords from nltk stopword set
-    pass
+    stoplist = stopwords.words('english')
+    for dish, words in corpus.items():
+        for word in words:
+            if word in stoplist:
+                del word
+        corpus[dish] = words
+    return corpus
 
 
 # classification
@@ -69,27 +79,29 @@ def most_frequent_sorted(frequencies):
     return sorted(ranked_freq)
 
 
-def classify_dishes(dish_corpus):
-# classify dishes
-# likely to be function that calls a bunch of subfunctions for various
-# classification tasks
-    pass
-
-
-def find_similar_dishes(dish):
+def find_similar_dishes(dish_id):
 # for a given dish, use fuzzy search to find the (10?) most similar
 # dishes. return a list of dish IDs in descending order of similarity
     pass
 
 
-def similar_dishes_for_corpus(corpus):
-# For a given corpus, return a dictionary with each dish ID mapped to a list of dish IDs
+def similar_dishes_for_corpus(dish_corpus):
+# Return a dictionary with each dish ID from corpus mapped to a list of dish IDs
 # of similar dishes, ordered in descending order of similarity.
+    similarities = {}
+    for dish_id, text in dish_corpus:
+        similar_list = find_similar_dishes(dish_id)
+        similarities[dish_id] = similar_list
+    return similarities
 # (if this runs too slowly: refactor so that results get pushed to database as calculated
 # for each dish -- will need to add check to see if similar dishes have already been calculated
 # for each dish)
-    pass
 
+
+def dishes_that_appear_with(dish):
+# For a given dish, generate a list of IDs of dishes that frequently
+# appear on the same menu as that dish.
+    pass
 
 
 def id_techniques(dish):
@@ -106,30 +118,36 @@ def id_techniques(dish):
     else:
         return None
 
-# def techniques_for_corpus(corpus):
-# should return a dictionary that maps menu items to list of techniques]
-#     technique_mappings = {}
-#     for id, text in corpus.items():
-#       call find techniques
-            # for each technique in list that gets returned:
-            #     check for technique in technique_mappings
-            #         if not there: add as key w/ value = 
-            #         list containing item id of dish
-            #         if there: append dish ID to end of value list
+
+def techniques_for_corpus(corpus):
+    dishes_to_techniques = {}
+    for dish_id, text in corpus.items():
+        techniques = id_category(dish_id)
+        dishes_to_categories[dish_id] = techniques
+    return dishes_to_techniques
 
 
-def map_techniques_to_dishes(techniques):
-# using dictionary from previous function, generate a count of
-# how often each technique appears. return a dictionary of
-# technique names mapped to dish IDs.
-    pass
+def map_techniques_to_dishes(dishes_to_techniques):
+    techniques_to_dishes = {}
+    for dish_id, techniques in dishes_to_techniques.items():
+        for c in techniques:
+            techniques_to_dishes.setdefault(c, [])
+            techniques_to_dishes[c].append(dish_id)
+    return techniques_to_dishes
 
 
-def find_technique_frequencies(technique_dict):
-# using result from previous function, generate a list of
-# techniques with a count of how often they appear in the dataset,
-# ordered from highest to lowest frequency.
-    pass
+def find_technique_frequencies(techniques_to_dishes):
+    technique_freq = {}
+    for technique, dishes in techniques_to_dishes.items():
+        technique_freq[technique] = len(dishes)
+    return technique_freq
+
+
+def sort_technique_frequencies(technique_freq):
+    sorted_technique_freq = []
+    for technique, frequency in technique_freq.items():
+        sorted_technique_freq.append((frequency, technique))
+    return sorted_technique_freq
 
 
 def id_category(dish):
@@ -140,14 +158,39 @@ def id_category(dish):
 
 
 def categories_for_corpus(corpus):
-    pass
+    dishes_to_categories = {}
+    for dish_id, text in corpus.items():
+        category = id_category(dish_id)
+        dishes_to_categories[dish_id] = category
+    return dishes_to_categories
 
 
-def map_categories_to_dishes(corpus):
-    pass
+def map_categories_to_dishes(dishes_to_categories):
+    categories_to_dishes = {}
+    for dish_id, categories in dishes_to_categories.items():
+        for c in categories:
+            categories_to_dishes.setdefault(c, [])
+            categories_to_dishes[c].append(dish_id)
+    return categories_to_dishes
 
 
-def find_category_frequencies():
+def find_category_frequencies(categories_to_dishes):
+    category_freq = {}
+    for category, dishes in categories_to_dishes.items():
+        category_freq[category] = len(dishes)
+    return category_freq
+
+
+def sort_category_frequencies(category_freq):
+    sorted_category_freq = []
+    for category, frequency in category_freq.items():
+        sorted_category_freq.append((frequency, category))
+    return sorted_category_freq
+
+
+def find_similar_restaurant(restaurant):
+# find restaurants similar to input restaurant based on comparison of dishes
+# this should be precalculated, persisted -- move to data processing?
     pass
 
 ###########################################
@@ -200,6 +243,6 @@ def find_unclassified(category):
 # def find_ingredient_frequencies():
 #     pass
 
-if __name__=="__main__":
-    corpus = build_dish_corpus()
-    lexicon = lexicon_setup()
+# if __name__=="__main__":
+#     corpus = build_dish_corpus()
+#     lexicon = lexicon_setup()

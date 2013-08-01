@@ -1,5 +1,6 @@
 import model
 from datetime import datetime
+from random import randint
 
 # functions to get menus / menu info
 
@@ -14,12 +15,19 @@ def count_menus_by_decade(year):
     endyear = year + 10
     while year < endyear:
         total += count_menus_by_year(year)
-        year = year + 1
+        year += 1
     return total
 
 
-def count_menus_by_years(decade):
-    pass
+def count_menus_by_years(year):
+# input is starting year of decade (i.e. 1960 for 1960s)
+    counts = {}
+    endyear = year + 10
+    while year < endyear:
+        count = count_menus_by_year(year)
+        counts[year] = count
+        year += 1
+    return counts
 
 
 def find_menus_by_year(year):
@@ -36,7 +44,21 @@ def find_menus_by_decade(year):
         menus = find_menus_by_year(year)
         for menu in menus:
             menu_list.append(menu)
+    return menu_list
 
+
+def get_total_menus():
+    count = model.session.query(model.Menu).count()
+    return count
+
+
+def get_random_menu():
+    count = get_total_menus()
+    num = randint(12463, count)
+    menu = model.session.query(model.Menu).get(num)
+    if menu == None:
+        get_random_menu()
+    return menu
 
 
 # functions to get restaurants / restautant info
@@ -47,22 +69,37 @@ def find_restaurant_by_name(name):
     return restaurant
 
 
-def find_similar_restaurant(restaurant):
-# find restaurants similar to input restaurant based on comparison of dishes
-    pass
+def location_same_as_name(restaurant):
+    return restaurant.name == restaurant.location
 
 
 # functions to get dishes / dish info
 
 
-def find_dish_keyword(keyword):
+def find_dishes_by_keyword(keyword):
     dish = model.session.query(model.Item).filter(model.Item.description.like('%' + keyword + '%')).all()
     return dish
+
+def find_dishes_by_technique(technique):
+    
+
+
+def find_dishes_by_category(category):
+    pass
+
+
+def count_dish_by_year(dish, year):
+# return count of how frequently a dish appears in given year.
+    pass
 
 
 def dish_frequency_by_year(dish, year):
 # calculate how frequently a dish (or category of dishes?) appears relative
 # to total number of dishes for that year
+    pass
+
+
+def count_dish_by_decade(dish, year):
     pass
 
 
@@ -77,6 +114,17 @@ def get_similar_dishes(dish, num):
     pass
 
 
-def find_random(input):
-# return a random restaurant, menu, or item (based on input)
-    pass
+def get_total_dishes():
+    count = model.session.query(model.Item).count()
+    return count
+
+
+def get_random_dish():
+    count = get_total_dishes()
+    num = randint(1, count)
+    dish = model.session.query(model.Item).get(num)
+    if dish == None:
+        get_random_dish()
+    return dish
+
+
