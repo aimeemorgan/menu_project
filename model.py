@@ -26,7 +26,7 @@ class Restaurant(Base):
     def __repr__(self):
         name = self.name.encode('utf-8')
         location = self.location.encode('utf-8')
-        return '<Restaurant: %s. Location: %s>' % (name, location
+        return '<Restaurant: %s. Location: %s>' % (name, location)
 
     def get_menus_date_sorted(self):
         return sorted(self.menus)
@@ -143,18 +143,18 @@ class Item(Base):
 #     items = relationship("Item", backref=backref("category"))
 
 
-class RestaurantSimilarities(Base):
+# class RestaurantSimilarities(Base):
     
-class MenuSimilarities(Base):
+# class MenuSimilarities(Base):
 
-class Ingredients(Base):
-    __tablename__ = "ingredients"
+# class Ingredients(Base):
+#     __tablename__ = "ingredients"
 
-class DishesIngredients(Base):
+# class DishesIngredients(Base):
 
 
-class MenuItem(Base):
-    __tablename__ = "menuitems"
+# class MenuItem(Base):
+#     __tablename__ = "menuitems"
 
     id = Column(Integer, primary_key=True)
     menu_id = Column(Integer, ForeignKey('menus.id'), nullable=False)
