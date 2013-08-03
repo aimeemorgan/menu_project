@@ -74,10 +74,11 @@ class Item(Base):
     latest_year = Column(DateTime, nullable=True)
     low_price = Column(Float, nullable=True)
     high_price = Column(Float, nullable=True)
-    # category = Column(Integer, ForeignKey="techniques.id", nullable=True)
+    category = Column(Integer, ForeignKey('categories.id'), nullable=True)
 
     menus = relationship("MenuItem", backref=backref("items"))
-    #techniques = relationship("ItemTechnique", backref=backref("items"))
+    techniques = relationship("ItemTechnique", backref=backref("items"))
+    ingredients = relationship("ItemIngredient", backref=backref("items"))
 
 
     def __repr__(self):
@@ -103,26 +104,72 @@ class Item(Base):
         return len(self.get_restaurants())
 
 
-# class Technique(Base):
-#     __tablename__ = "techniques"
-
-#     id = column(Integer, primary_key=True)
-#     name = column(String, nullable=False)
-#
-#     items = relationship("ItemTechnique", backref=backref("techniques"))
-#     
+    # def get_ingredients(self):
+    #     ingredients = []
+    #     for ingredient in self.ingredients:
+    #         ingredients.append(ingredient.menu.restaurant)
+    #     return restaurants
 
 
-# class ItemTechnique(Base):
-#     __tablename__ = "itemtechniques"
+class Technique(Base):
+    __tablename__ = "techniques"
 
-#     id = Column(Interger, primary_key=True)
-#     item_id = Column(Integer, ForeignKey('items.id'), nullable=False)
-#     technique_id = Column(Integer, ForeignKey('techniques.id'), nullable=False)
-#   
-#     item = relationship("Item", backref=backref("itemtechniques"))
-#     technique = relationship("Menu", backref=backref("itemtechniques")
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
 
+    items = relationship("ItemTechnique", backref=backref("techniques"))
+
+
+class Category(Base):
+    __tablename__ = "categories"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+
+    items = relationship("Item", backref=backref("categories"))
+
+
+class Ingredient(Base):
+    __tablename__ = "ingredients"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    items = relationship("ItemIngredient", backref=backref("ingredients"))
+
+
+class ItemIngredient(Base):
+    __tablename__ = "itemingredients"
+
+    id = Column(Integer, primary_key=True)
+    ingredient_id = Column(Integer, ForeignKey('ingredients.id'), nullable=False)
+    item_id = Column(Integer, ForeignKey('items.id'), nullable=False)
+    price = Column(Float, nullable=True)
+
+    item = relationship("Item", backref=backref("itemingredient"))
+    ingredient = relationship("Ingredient", backref=backref("itemingredient"))
+
+
+class MenuItem(Base):
+    __tablename__ = "menuitems"
+
+    id = Column(Integer, primary_key=True)
+    menu_id = Column(Integer, ForeignKey('menus.id'))
+    item_id = Column(Integer, ForeignKey('items.id'))
+    price = Column(Float, nullable=True)
+
+    item = relationship("Item", backref=backref("menuitem"))
+    menu = relationship("Menu", backref=backref("menuitem"))
+
+
+class ItemTechnique(Base):
+    __tablename__ = "itemtechniques"
+
+    id = Column(Integer, primary_key=True)
+    item_id = Column(Integer, ForeignKey('items.id'), nullable=False)
+    technique_id = Column(Integer, ForeignKey('techniques.id'), nullable=False)
+  
+    item = relationship("Item", backref=backref("itemtechniques"))
+    technique = relationship("Technique", backref=backref("itemtechniques"))
+    
 
 # class ItemSimilarities(Base):
 #     __tablename__ = "itemsimilarities"
@@ -134,36 +181,20 @@ class Item(Base):
 #     item = relationship("Item", backref=backref("similarities"))
 
 
-# class Categories(Base):
-#     __tablename__ = "categories"
-
-#     id = Column(Integer, primary_key=True)
-#     name = column(String, nullable=False)
-
-#     items = relationship("Item", backref=backref("category"))
-
-
 # class RestaurantSimilarities(Base):
-    
+#     __tablename__ = "restaurantsimilarities"
+#     restaurant_id_1 = Column(Integer, ForeignKey('restaurantss.id'), nullable=False)
+#     restaurant_id_2 = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
+
+#     restaurant = relationship("Restaurant", backref=backref("similarities"))
+
+
 # class MenuSimilarities(Base):
+#     __tablename__ = "menusimilarities"
+#     restaurant_id_1 = Column(Integer, ForeignKey('restaurantss.id'), nullable=False)
+#     restaurant_id_2 = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
 
-# class Ingredients(Base):
-#     __tablename__ = "ingredients"
-
-# class DishesIngredients(Base):
-
-
-# class MenuItem(Base):
-#     __tablename__ = "menuitems"
-
-    id = Column(Integer, primary_key=True)
-    menu_id = Column(Integer, ForeignKey('menus.id'), nullable=False)
-    item_id = Column(Integer, ForeignKey('items.id'), nullable=False)
-    price = Column(Float, nullable=True)
-
-    item = relationship("Item", backref=backref("menuitem"))
-    menu = relationship("Menu", backref=backref("menuitem"))
-
+#     restaurant = relationship("Restaurant", backref=backref("similarities"))
 
 ### End class declarations
 

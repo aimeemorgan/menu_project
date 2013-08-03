@@ -31,10 +31,10 @@ def count_menus_by_years(year):
 
 def counts_for_all_decades():
 # for map dislay: return list of lists of (decade, count)
-    decade_list = []
+    decade_list = [['Decade', 'Menu Count']]
     for year in range(1850, 2010, 10):
         count = count_menus_by_decade(year)
-        decade_list.append([year, count])
+        decade_list.append([str(year), count])
     return decade_list
 
 
@@ -89,6 +89,7 @@ def find_dishes_by_keyword(keyword):
     return dish
 
 def find_dishes_by_technique(technique):
+    pass
     
 
 

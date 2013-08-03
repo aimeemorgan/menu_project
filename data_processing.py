@@ -79,23 +79,44 @@ def most_frequent_sorted(frequencies):
     return sorted(ranked_freq)
 
 
-def find_similar_dishes(dish_id):
-# for a given dish, use fuzzy search to find the (10?) most similar
-# dishes. return a list of dish IDs in descending order of similarity
-    pass
+def find_similarity_scores(item_id, dish_corpus):
+# for a given dish, use fuzzy search to calculate similarity scores
+# for other dishes in the corpus. return a list of dish IDs in descending order of 
+# similarity
+    scores = {}
+    comparison_desc = dish_corpus[item_id]
+    for item, desc in dish_corpus.items():
+        if item_id != item:
+            score = fuzz.token_set_ratio(dish_corpus[comparision_desc], desc)
+            scores[item] = score
+    return scores
+
+
+def rank_similarities(scores):
+    ranked_scores = []
+    while len(ranked_scores) < 10:
+        for item, score in scores.items():
+            ranked_scores.append((score, item))
+    return sorted(ranked_scores)
 
 
 def similar_dishes_for_corpus(dish_corpus):
 # Return a dictionary with each dish ID from corpus mapped to a list of dish IDs
-# of similar dishes, ordered in descending order of similarity.
+# of 10 similar dishes, ordered in descending order of similarity.
     similarities = {}
-    for dish_id, text in dish_corpus:
-        similar_list = find_similar_dishes(dish_id)
+    for dish_id, text in dish_corpus.items():
+        scores = find_similarity_scores(dish_id)
+        similar_list = rank_similarities(scores)
         similarities[dish_id] = similar_list
     return similarities
 # (if this runs too slowly: refactor so that results get pushed to database as calculated
 # for each dish -- will need to add check to see if similar dishes have already been calculated
 # for each dish)
+
+# def persist_similarities(similarities):
+#     for dish_id, dishes in similarities:
+#         for dish in dishes:
+#             new_similarity = 
 
 
 def dishes_that_appear_with(dish):
@@ -136,6 +157,24 @@ def map_techniques_to_dishes(dishes_to_techniques):
     return techniques_to_dishes
 
 
+# def persist_techniques(techniques_to_dishes):
+# # write technique info to Techniques table.
+#     technique_id = 1
+#     for technique, dishes in techniques_to_dishes.items():
+#         new_technique = model.Technique(name=technique, id=technique_id)
+#         session.add(new_technique)
+#         for dish in dishes:
+#             !!!!!new_itemtechnique = model.Technique(name=technique, id=technique_id)
+#         session.commit()
+#         technique_id += 1
+
+
+def persist_techniques_to_dishes(techniques_to_dishes):
+# write new ItemTechnique relationship to database
+    pass
+
+
+
 def find_technique_frequencies(techniques_to_dishes):
     technique_freq = {}
     for technique, dishes in techniques_to_dishes.items():
@@ -172,6 +211,19 @@ def map_categories_to_dishes(dishes_to_categories):
             categories_to_dishes.setdefault(c, [])
             categories_to_dishes[c].append(dish_id)
     return categories_to_dishes
+
+
+def persist_categories(categories_to_dishes):
+    category_id = 1
+    for category, dishes in categories_to_dishes.items():
+        new_cateogory = model.Category(name=category, id=category_id)
+        session.add(new_category)
+        for dish in dishes:
+            item = model.session.query(model.Item).get(num)
+            item.category = category_id
+            session.add(item)
+        session.commit()
+        category_id += 1
 
 
 def find_category_frequencies(categories_to_dishes):
