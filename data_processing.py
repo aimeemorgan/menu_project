@@ -119,19 +119,21 @@ def similar_dishes_for_corpus(dish_corpus):
 #             new_similarity = 
 
 
+
+
 def dishes_that_appear_with(dish):
 # For a given dish, generate a list of IDs of dishes that frequently
 # appear on the same menu as that dish.
     pass
 
 
-def id_techniques(dish):
+def id_techniques(dish_id, corpus):
 # identify verbs in dish descriptions as a way of classifying
 # by preparation methods.
-    dish_words = corpus[dish]
+    dish_words = corpus[dish_id]
     techniques = []
     for word in dish_words:
-        suffix = str(word[-2:])
+        suffix = (word[-2:]).encode('utf-8')
         if suffix == 'ed':
             techniques.append(word)
     if len(techniques) > 0:
@@ -143,36 +145,37 @@ def id_techniques(dish):
 def techniques_for_corpus(corpus):
     dishes_to_techniques = {}
     for dish_id, text in corpus.items():
-        techniques = id_category(dish_id)
-        dishes_to_categories[dish_id] = techniques
+        techniques = id_techniques(dish_id, corpus)
+        if techniques:
+            dishes_to_techniques[dish_id] = techniques
     return dishes_to_techniques
 
 
 def map_techniques_to_dishes(dishes_to_techniques):
     techniques_to_dishes = {}
+    false_matches = ['bed', 'red', 'served', 'assorted']
     for dish_id, techniques in dishes_to_techniques.items():
         for c in techniques:
+            if c not in 
             techniques_to_dishes.setdefault(c, [])
             techniques_to_dishes[c].append(dish_id)
     return techniques_to_dishes
 
 
-# def persist_techniques(techniques_to_dishes):
-# # write technique info to Techniques table.
-#     technique_id = 1
-#     for technique, dishes in techniques_to_dishes.items():
-#         new_technique = model.Technique(name=technique, id=technique_id)
-#         session.add(new_technique)
-#         for dish in dishes:
-#             !!!!!new_itemtechnique = model.Technique(name=technique, id=technique_id)
-#         session.commit()
-#         technique_id += 1
-
-
-def persist_techniques_to_dishes(techniques_to_dishes):
-# write new ItemTechnique relationship to database
-    pass
-
+def persist_techniques(techniques_to_dishes):
+# write technique info to Techniques table.
+    technique_id = 1
+    itemtechnique_id = 1
+    for technique, dishes in techniques_to_dishes.items():
+        new_technique = model.Technique(name=technique, id=technique_id)
+        model.session.add(new_technique)
+        for dish in dishes:
+            new_itemtechnique = model.ItemTechnique(item_id=dish, 
+                                                    technique_id=technique_id)
+            model.session.add(new_itemtechnique)
+            model.session.commit()
+            itemtechnique_id += 1
+        technique_id += 1
 
 
 def find_technique_frequencies(techniques_to_dishes):

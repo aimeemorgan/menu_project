@@ -29,9 +29,12 @@ def count_menus_by_years(year):
         year += 1
     return counts
 
+
 def counts_for_all_decades():
 # for map dislay: return list of lists of (decade, count)
-    decade_list = [['Decade', 'Menu Count']]
+    decade = 'Decade'
+    menu_count = 'Menu Count'
+    decade_list = [[decade, menu_count]] 
     for year in range(1850, 2010, 10):
         count = count_menus_by_decade(year)
         decade_list.append([str(year), count])
@@ -85,31 +88,54 @@ def location_same_as_name(restaurant):
 
 
 def find_dishes_by_keyword(keyword):
-    dish = model.session.query(model.Item).filter(model.Item.description.like('%' + keyword + '%')).all()
-    return dish
+    dishes = model.session.query(model.Item).filter(model.Item.description.like('%' + keyword + '%')).all()
+    return dishes
 
 def find_dishes_by_technique(technique):
+    dishes = model.session.query(model.Item).filter(model.Item.technique.like('%' + technique + '%')).all()
+    return dishes
     pass
-    
 
 
 def find_dishes_by_category(category):
-    pass
+    dishes = model.session.query(model.Item).filter(model.Item.category.like
+                ('%' + category + '%')).all()
+    return dishes
 
 
 def count_dish_by_year(dish, year):
 # return count of how frequently a dish appears in given year.
-    pass
+    count = 0
+    for i in dish.menus:
+        date = i.menu.date
+        print date
+        if (date >= datetime(year, 1, 1)) and (date <= datetime(year, 12, 31)):
+            count += 1
+            print count
+    return count
+
+
+def total_dishes_per_year(year):
+# not unique; total number of menu items per year
+    count = 0
+    menus = find_menus_by_year(year)
+    for menu in menus:
+        count += menu.count_items()
+    return count
 
 
 def dish_frequency_by_year(dish, year):
-# calculate how frequently a dish (or category of dishes?) appears relative
-# to total number of dishes for that year
-    pass
+    dish_total = float(count_dish_by_year(dish, year))
+    year_total = float(total_dishes_per_year())
+    if year_total != 0:
+        return dish_total / year_total
+    else:
+        return 0
 
-
-def count_dish_by_decade(dish, year):
-    pass
+# !!!!!!!!!!!!!!!!!!!
+# def count_dish_by_decade(dish, year):
+#     endyear = year + 10
+#     count = 0
 
 
 def dish_frequency_by_decade(dish, decade):

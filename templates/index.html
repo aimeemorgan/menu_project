@@ -1,13 +1,30 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Bootstrap 101 Template</title>
+    <title>Historic Menus OMG</title>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var decadeList = {{ decade_list|safe }};
+        var data = google.visualization.arrayToDataTable(
+          decadeList
+          );
 
+        var options = {
+          title: 'Menu Count by Decade',
+          hAxis: {title: 'Decade', titleTextStyle: {color: 'red'}}
+        };
+
+        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        chart.draw(data, options);
+      }
+    </script>
   </head>
   <body>
     <h1>Hello, world!</h1>
-
-   
-    <p>explore the New York Public Library's "What's on the Menu dataset"</p>
+    <p>Explore the New York Public Library's "What's on the Menu dataset"</p>
+       <div id="chart_div" style="width: 1200px; height: 500px;"></div>
   </body>
 </html>
