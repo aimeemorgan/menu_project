@@ -2,6 +2,7 @@
 
 from flask import Flask, render_template, redirect, request
 import model
+import controller
 
 app = Flask(__name__)
 
@@ -10,10 +11,12 @@ app = Flask(__name__)
 def shutdown_session(exception=None):
     model.session.remove()
 
-
 @app.route("/")
 def index():
-    return render_template("index.html")
+    # generate counts for main map of menus by decade
+    decade_list = controller.counts_for_all_decades()
+    print decade_list
+    return render_template("index.html", decade_list=decade_list)
 
 
 @app.route("/about")
@@ -23,17 +26,16 @@ def about():
 
 @app.route("/dish")
 def dish():
-	return render_template("dish.html")
+    return render_template("dish.html")
 
 
 @app.route("/menu")
 def menu():
-	return render_template("menu.html")
+    return render_template("menu.html")
 
-
-@app_route("restaurant")
+@app.route("/restaurant")
 def restaurant():
-	return render_template("restaurant.html")
+    return render_template("restaurant.html")
 
 
 if __name__ == "__main__":

@@ -63,7 +63,7 @@ def strip_stopwords(corpus):
 
 def word_frequencies(corpus):
 # build a dictionary with corpus words mapped to the number
-# of times they appear.
+# of timtes they appear.
     frequencies = {}
     for dish, words in corpus.items():
         for word in words:
@@ -81,8 +81,8 @@ def most_frequent_sorted(frequencies):
 
 def find_similarity_scores(item_id, dish_corpus):
 # for a given dish, use fuzzy search to calculate similarity scores
-# for other dishes in the corpus. 
-# stemming???
+# for other dishes in the corpus. return a list of dish IDs in descending order of 
+# similarity
     scores = {}
     comparison_desc = dish_corpus[item_id]
     for item, desc in dish_corpus.items():
@@ -92,12 +92,11 @@ def find_similarity_scores(item_id, dish_corpus):
     return scores
 
 
-def rank_similarities(scores): 
+def rank_similarities(scores):
     ranked_scores = []
     while len(ranked_scores) < 10:
         for item, score in scores.items():
-            if score > .5:  # check results to see if this is reasonable cutoff
-                ranked_scores.append((score, item))
+            ranked_scores.append((score, item))
     return sorted(ranked_scores)
 
 
@@ -107,24 +106,17 @@ def similar_dishes_for_corpus(dish_corpus):
     similarities = {}
     for dish_id, text in dish_corpus.items():
         scores = find_similarity_scores(dish_id)
-        ranked_scores = rank_similarities(scores)    
+        similar_list = rank_similarities(scores)
         similarities[dish_id] = similar_list
     return similarities
 # (if this runs too slowly: refactor so that results get pushed to database as calculated
 # for each dish -- will need to add check to see if similar dishes have already been calculated
 # for each dish)
 
-def persist_similarities(similarities):
-    for dish_id, ranked_scores in similarities:
-        similarity_id = 0
-        for item in ranked_scores:
-            new_similarity = new_itemsimilarity = model.ItemSimilarity(
-                                                    id = similarity_id,
-                                                    item_id_1 = dish_id,
-                                                    item_id_2 = item[1],
-                                                    score = item[0])
-            session.add(new_similarity)
-            session.commit()
+# def persist_similarities(similarities):
+#     for dish_id, dishes in similarities:
+#         for dish in dishes:
+#             new_similarity = 
 
 
 
@@ -132,23 +124,7 @@ def persist_similarities(similarities):
 def dishes_that_appear_with(dish):
 # For a given dish, generate a list of IDs of dishes that frequently
 # appear on the same menu as that dish.
-# so basically, for a given dish ID:
-# 1. get all menus on which that dish appears (there's a function!)
-# 1.5 count all menus on which that dish appears, save count
-# 2. make a blank dictionary
-# 3. for each menu, add each item on the menu to the blank dictionary w count of occurences
-# 4. for each entry in dictionary: replace value with value/menu count to get ratio
-#    (between 0 and 1)
-# 5: make list mapping frequency ratio to dish ID
     pass
-    
-
-def appears_with_for_corpus(corpus):
-# call above fucntion for every dish in 
-    appearances = {}
-    for dish_id, description in corpus.items():
-        appearances [dish_id] = dishes_that_appear_with(dish_id)
-    return appearances
 
 
 def id_techniques(dish_id, corpus):
@@ -177,12 +153,12 @@ def techniques_for_corpus(corpus):
 
 def map_techniques_to_dishes(dishes_to_techniques):
     techniques_to_dishes = {}
-    false_matches = {'bed': 0, 'red': 0, 'served': 0, 'assorted': 0}
+    false_matches = ['bed', 'red', 'served', 'assorted']
     for dish_id, techniques in dishes_to_techniques.items():
         for c in techniques:
-            if c not in false_matches:
-                techniques_to_dishes.setdefault(c, [])
-                techniques_to_dishes[c].append(dish_id)
+            if c not in 
+            techniques_to_dishes.setdefault(c, [])
+            techniques_to_dishes[c].append(dish_id)
     return techniques_to_dishes
 
 
@@ -200,6 +176,7 @@ def persist_techniques(techniques_to_dishes):
             model.session.commit()
             itemtechnique_id += 1
         technique_id += 1
+
 
 def find_technique_frequencies(techniques_to_dishes):
     technique_freq = {}
@@ -266,6 +243,10 @@ def sort_category_frequencies(category_freq):
     return sorted_category_freq
 
 
+def find_similar_restaurant(restaurant):
+# find restaurants similar to input restaurant based on comparison of dishes
+# this should be precalculated, persisted -- move to data processing?
+    pass
 
 ###########################################
 # postprocessing
@@ -273,7 +254,6 @@ def sort_category_frequencies(category_freq):
 # some kind of master function for reading classification info
 # from dictionaries, writing to csv files for import to database for webapp
 # (likely to be called from within classification subfunctions)
-# try it using above functions first - -see how slow it is.
 
 
 ###########################################
@@ -317,11 +297,6 @@ def find_unclassified(category):
 
 # def find_ingredient_frequencies():
 #     pass
-
-# def find_similar_restaurant(restaurant):
-# # find restaurants similar to input restaurant based on comparison of dishes
-# # this should be precalculated, persisted -- move to data processing?
-
 
 # if __name__=="__main__":
 #     corpus = build_dish_corpus()

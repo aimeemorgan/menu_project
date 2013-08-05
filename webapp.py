@@ -3,7 +3,10 @@
 from flask import Flask, render_template, redirect, request
 import model
 import controller
+import os, sys
 
+sys.path.append(os.getcwd())
+sys.path.append("../")
 app = Flask(__name__)
 
 

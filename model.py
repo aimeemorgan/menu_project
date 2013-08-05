@@ -21,7 +21,9 @@ class Restaurant(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(256), nullable=False)
     location = Column(String(256))
+
     menus = relationship("Menu", backref=backref("restaurant"))
+    similarities = relationship("RestaurantSimilarity", backref=backref("restaurants"))
 
     def __repr__(self):
         name = self.name.encode('utf-8')
@@ -51,6 +53,8 @@ class Menu(Base):
     sponsor = Column(String)
 
     items = relationship("MenuItem", backref=backref("menus"))
+    similarities = relationship("MenuSimilarity", backref=backref("menus"))
+
 
     def __repr__(self):
         return '<Menu: %s, %s>' % (self.date, self.restaurant.name)
@@ -79,6 +83,7 @@ class Item(Base):
     menus = relationship("MenuItem", backref=backref("items"))
     techniques = relationship("ItemTechnique", backref=backref("items"))
     ingredients = relationship("ItemIngredient", backref=backref("items"))
+    similarities = relationship("ItemSimilarity", backref=backref("items"))
 
 
     def __repr__(self):
@@ -104,11 +109,11 @@ class Item(Base):
         return len(self.get_restaurants())
 
 
-    # def get_ingredients(self):
-    #     ingredients = []
-    #     for ingredient in self.ingredients:
-    #         ingredients.append(ingredient.menu.restaurant)
-    #     return restaurants
+    def get_ingredients(self):
+        ingredients = []
+        for ingredient in self.ingredients:
+            ingredients.append(ingredient.menu.restaurant)
+        return ingredients
 
 
 class Technique(Base):
@@ -131,8 +136,10 @@ class Category(Base):
 
 class Ingredient(Base):
     __tablename__ = "ingredients"
+
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+
     items = relationship("ItemIngredient", backref=backref("ingredients"))
 
 
@@ -171,30 +178,38 @@ class ItemTechnique(Base):
     technique = relationship("Technique", backref=backref("itemtechniques"))
     
 
-# class ItemSimilarities(Base):
-#     __tablename__ = "itemsimilarities"
+class ItemSimilarity(Base):
+    __tablename__ = "itemsimilarities"
 
-#     id = Column(Integer, primary_key=True)
-#     item_id_1 = Column(Integer, ForeignKey('items.id'), nullable=False)
-#     item_id_2 = Column(Integer, ForeignKey('items.id'), nullable=False)
+    id = Column(Integer, primary_key=True)
+    item_id_1 = Column(Integer, ForeignKey('items.id'), nullable=False)
+    item_id_2 = Column(Integer, ForeignKey('items.id'), nullable=False)
+    score = Column(Float, nullable=False)
 
-#     item = relationship("Item", backref=backref("similarities"))
-
-
-# class RestaurantSimilarities(Base):
-#     __tablename__ = "restaurantsimilarities"
-#     restaurant_id_1 = Column(Integer, ForeignKey('restaurantss.id'), nullable=False)
-#     restaurant_id_2 = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
-
-#     restaurant = relationship("Restaurant", backref=backref("similarities"))
+    item = relationship("Item", backref=backref("similarities"))
+#   this setup will result in each relationship being recorded twice -- better way?
 
 
-# class MenuSimilarities(Base):
-#     __tablename__ = "menusimilarities"
-#     restaurant_id_1 = Column(Integer, ForeignKey('restaurantss.id'), nullable=False)
-#     restaurant_id_2 = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
+class RestaurantSimilarity(Base):
+    __tablename__ = "restaurantsimilarities"
 
-#     restaurant = relationship("Restaurant", backref=backref("similarities"))
+    id = Column(Integer, primary_key=True)
+    restaurant_id_1 = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
+    restaurant_id_2 = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
+    score = Column(Float, nullable=False)
+
+    restaurant = relationship("Restaurant", backref=backref("similarities"))
+
+
+class MenuSimilarity(Base):
+    __tablename__ = "menusimilarities"
+
+    id = Column(Integer, primary_key=True)
+    menu_id_1 = Column(Integer, ForeignKey('menus.id'), nullable=False)
+    menu_id_2 = Column(Integer, ForeignKey('menus.id'), nullable=False)
+    score = Column(Float, nullable=False)
+
+    menu = relationship("Menu", backref=backref("similarities"))
 
 ### End class declarations
 

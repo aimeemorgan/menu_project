@@ -17,7 +17,7 @@ lexicon_names = ['POULTRY',
 def lexicon_setup():
     lexicon = {}
     for name in lexicon_names:
-        filepath = './lexicon/" + str(name).lower() + '.txt'
+        filepath = './lexicon/' + str(name).lower() + '.txt'
         f = open(filepath)
         lexicon.setdefault(name, [])
         for row in f:

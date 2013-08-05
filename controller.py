@@ -1,6 +1,8 @@
 import model
 from datetime import datetime
 from random import randint
+import os, sys
+sys.path.append(os.getcwd())
 
 # functions to get menus / menu info
 
@@ -132,21 +134,50 @@ def dish_frequency_by_year(dish, year):
     else:
         return 0
 
-# !!!!!!!!!!!!!!!!!!!
-# def count_dish_by_decade(dish, year):
-#     endyear = year + 10
-#     count = 0
+
+def count_dish_by_decade(dish, year):
+    endyear = year + 10
+    count = 0
+    for year in range (year, endyear):
+        count += count_dish_by_year(count, year)
+    return count
+
+def total_dishes_per_decade(year):
+    total = 0
+    endyear = year + 10
+    for year in range(year, endyear):
+        total += total_dishes_per_year(year)
+    return total
 
 
-def dish_frequency_by_decade(dish, decade):
-    pass
+def dish_frequency_by_decade(dish, year):
+    dish_total = float(count_dish_by_decade(dish, year))
+    decade_total = float(total_dishes_per_decade(year))
+    return dish_total / decade_total
+
+
+def dish_frequency_decade_for_corpus(year, corpus):
+    dish_frequencies = {}
+    for dish in corpus:
+        dish_frequencies[dish] = dish_frequency_by_decade(dish, year)
+    return dish_frequencies
+
+
+def dish_frequency_decade_sorted(dish_frequencies):
+    freq = []
+    for dish, frequency in dish_frequencies.items():
+        freq.append((frequency, dish))
+    return sorted(freq)
 
 
 def get_similar_dishes(dish, num):
 # return a list of <num> dishes that are most similar to <dish>
-# (based on fuzzy text search score)
-# (precalculate and persist this in database)
-    pass
+    item = session.query(Restaurant).get(dish)
+    results = []
+    for s in item.similarities:
+        results.append(s.score, s.item_id_2)
+    results = sorted(results)
+    return results[0:num]
 
 
 def get_total_dishes():
