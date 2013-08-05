@@ -23,7 +23,7 @@ class Restaurant(Base):
     location = Column(String(256))
 
     menus = relationship("Menu", backref=backref("restaurant"))
-    similarities = relationship("RestaurantSimilarity", backref=backref("restaurants"))
+    similar_restaurants = relationship("RestaurantSimilarity", backref=backref("restaurants"))
 
     def __repr__(self):
         name = self.name.encode('utf-8')
@@ -53,7 +53,7 @@ class Menu(Base):
     sponsor = Column(String)
 
     items = relationship("MenuItem", backref=backref("menus"))
-    similarities = relationship("MenuSimilarity", backref=backref("menus"))
+    similar_menus = relationship("MenuSimilarity", backref=backref("menus"))
 
 
     def __repr__(self):
@@ -83,7 +83,7 @@ class Item(Base):
     menus = relationship("MenuItem", backref=backref("items"))
     techniques = relationship("ItemTechnique", backref=backref("items"))
     ingredients = relationship("ItemIngredient", backref=backref("items"))
-    similarities = relationship("ItemSimilarity", backref=backref("items"))
+    similar_items = relationship("ItemSimilarity", backref=backref("items"))
 
 
     def __repr__(self):
@@ -183,10 +183,10 @@ class ItemSimilarity(Base):
 
     id = Column(Integer, primary_key=True)
     item_id_1 = Column(Integer, ForeignKey('items.id'), nullable=False)
-    item_id_2 = Column(Integer, ForeignKey('items.id'), nullable=False)
+    item_id_2 = Column(Integer, nullable=False)
     score = Column(Float, nullable=False)
 
-    item = relationship("Item", backref=backref("similarities"))
+    similar_items = relationship("Item", backref=backref("similarities"))
 #   this setup will result in each relationship being recorded twice -- better way?
 
 
@@ -195,10 +195,10 @@ class RestaurantSimilarity(Base):
 
     id = Column(Integer, primary_key=True)
     restaurant_id_1 = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
-    restaurant_id_2 = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
+    restaurant_id_2 = Column(Integer, nullable=False)
     score = Column(Float, nullable=False)
 
-    restaurant = relationship("Restaurant", backref=backref("similarities"))
+    similar_restaurants = relationship("Restaurant", backref=backref("similarities"))
 
 
 class MenuSimilarity(Base):
@@ -206,10 +206,10 @@ class MenuSimilarity(Base):
 
     id = Column(Integer, primary_key=True)
     menu_id_1 = Column(Integer, ForeignKey('menus.id'), nullable=False)
-    menu_id_2 = Column(Integer, ForeignKey('menus.id'), nullable=False)
+    menu_id_2 = Column(Integer, nullable=False)
     score = Column(Float, nullable=False)
 
-    menu = relationship("Menu", backref=backref("similarities"))
+    similar_menus = relationship("Menu", backref=backref("similarities"))
 
 ### End class declarations
 

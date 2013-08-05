@@ -18,8 +18,19 @@ def shutdown_session(exception=None):
 def index():
     # generate counts for main map of menus by decade
     decade_list = controller.counts_for_all_decades()
-    print decade_list
-    return render_template("index.html", decade_list=decade_list)
+    random_item = controller.get_random_dish()
+    random_menu = controller.get_random_menu()
+    #random_restaurant = controller.get_random_restaurant()
+    # will implement this when restaurant dedup has been done
+    menu_total = controller.get_total_menus()
+    item_total = controller.get_total_dishes()
+    restaurant_total = controller.get_total_restaurants()
+    return render_template("index.html", decade_list=decade_list, 
+                                         random_item=random_item,
+                                         random_menu=random_menu,
+                                         menu_total=menu_total,
+                                         restaurant_total=restaurant_total,
+                                         item_total=item_total)
 
 
 @app.route("/about")
@@ -27,18 +38,38 @@ def about():
     return render_template("about.html")
 
 
-@app.route("/dish")
-def dish():
-    return render_template("dish.html")
+@app.route("/item/<int:item_id>")
+def item_details(item_id):
+    item = model.session.query(model.Item).get(item_id)
+    return render_template("item.html", item=item)
 
 
-@app.route("/menu")
-def menu():
-    return render_template("menu.html")
+@app.route("/menu/<int:menu_id>")
+def menu_details(menu_id):
+    menu = model.session.query(model.Menu).get(menu_id)
+    return render_template("menu.html", menu=menu)
 
-@app.route("/restaurant")
-def restaurant():
-    return render_template("restaurant.html")
+
+@app.route("/restaurant/<int:restaurant_id>")
+def restaurant_details(restaurant_id):
+    restaurant = model.session.query(model.Restaurant).get(restaurant_id)
+    return render_template("restaurant.html", restaurant=restaurant)
+
+
+@app.route("/explore_techniques")
+def explore_techniques():
+    return render_template("explore_techniques.html")
+
+
+@app.route("/explore_categories")
+def explore_categories():
+    return render_template("explore_categories.html")
+
+
+@app.route("/explore_decades")
+def explore_decades():
+    return render_template("explore_decades.html")
+
 
 
 if __name__ == "__main__":

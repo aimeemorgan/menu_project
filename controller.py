@@ -1,8 +1,7 @@
 import model
 from datetime import datetime
 from random import randint
-import os, sys
-sys.path.append(os.getcwd())
+
 
 # functions to get menus / menu info
 
@@ -70,7 +69,7 @@ def get_random_menu():
     num = randint(12463, count)
     menu = model.session.query(model.Menu).get(num)
     if menu == None:
-        get_random_menu()
+        menu = get_random_menu()
     return menu
 
 
@@ -84,6 +83,10 @@ def find_restaurant_by_name(name):
 
 def location_same_as_name(restaurant):
     return restaurant.name == restaurant.location
+
+def get_total_restaurants():
+    count = model.session.query(model.Restaurant).count()
+    return count
 
 
 # functions to get dishes / dish info
@@ -142,6 +145,7 @@ def count_dish_by_decade(dish, year):
         count += count_dish_by_year(count, year)
     return count
 
+
 def total_dishes_per_decade(year):
     total = 0
     endyear = year + 10
@@ -172,7 +176,7 @@ def dish_frequency_decade_sorted(dish_frequencies):
 
 def get_similar_dishes(dish, num):
 # return a list of <num> dishes that are most similar to <dish>
-    item = session.query(Restaurant).get(dish)
+    item = model.session.query(model.Restaurant).get(dish)
     results = []
     for s in item.similarities:
         results.append(s.score, s.item_id_2)
@@ -190,7 +194,7 @@ def get_random_dish():
     num = randint(1, count)
     dish = model.session.query(model.Item).get(num)
     if dish == None:
-        get_random_dish()
+        dish = get_random_dish()
     return dish
 
 
