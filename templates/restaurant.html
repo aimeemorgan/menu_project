@@ -3,11 +3,15 @@
   <head>
     <title>Historic Menus OMG</title>
     <h1>Restaurant details for {{ restaurant.name }}</h1>
-    <p>Location info:</p>
+    <p>Location info: {{ restaurant.location }}</p>
     <p>Earliest menu date:</p>
     <p>Latest menu date:</p>
-    <h2>Menus from this restaurant:</h2>
-    <p>[list goes here]</p>
+    <h2>Menus from this restaurant: [ADD COUNT]</h2>
+    <ul>
+    {% for menu in restaurant.menus %}
+        <li><a href="../menu/{{ menu].id }}">{{ menu.date.year }}/{{ menu.date.month }}/{{ menu.date.day }}</a></li>
+    {% endfor %}
+    </ul>
     <h2>Other similar restaurants in the collection:</h2>
     <p>[list goes here]</p>
   </body>

@@ -57,7 +57,8 @@ class Menu(Base):
 
 
     def __repr__(self):
-        return '<Menu: %s, %s>' % (self.date, self.restaurant.name)
+        return '<%s, %s>' % (self.date,
+                            (self.restaurant.name).encode('utf-8'))
 
     def get_items(self):
         items = []
@@ -107,7 +108,6 @@ class Item(Base):
 
     def count_restaurants(self):
         return len(self.get_restaurants())
-
 
     def get_ingredients(self):
         ingredients = []

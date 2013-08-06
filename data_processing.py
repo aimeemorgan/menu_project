@@ -1,7 +1,7 @@
 import model
 import nltk
 from nltk.corpus import stopwords
-from lexicon import lexicon_names, lexicon_setup
+#from lexicon import lexicon_names, lexicon_setup
 from datetime import datetime 
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
@@ -84,15 +84,16 @@ def find_similarity_scores(item_id, dish_corpus):
 # for other dishes in the corpus. 
 # stemming???
     scores = {}
-    comparison_desc = dish_corpus[item_id]
+    comparison_desc = ''.join(dish_corpus[item_id])
     for item, desc in dish_corpus.items():
         if item_id != item:
-            score = fuzz.token_set_ratio(dish_corpus[comparision_desc], desc)
+            score = fuzz.token_set_ratio(dish_corpus[comparison_desc],
+                                         ''.join(desc))
             scores[item] = score
     return scores
 
 
-def rank_similarities(scores): 
+def rank_similarities(scores):
     ranked_scores = []
     while len(ranked_scores) < 10:
         for item, score in scores.items():
@@ -106,7 +107,7 @@ def similar_dishes_for_corpus(dish_corpus):
 # of 10 similar dishes, ordered in descending order of similarity.
     similarities = {}
     for dish_id, text in dish_corpus.items():
-        scores = find_similarity_scores(dish_id)
+        scores = find_similarity_scores(dish_id, dish_corpus)
         ranked_scores = rank_similarities(scores)    
         similarities[dish_id] = similar_list
     return similarities
@@ -319,8 +320,10 @@ def find_unclassified(category):
 #     pass
 
 # def find_similar_restaurant(restaurant):
-# # find restaurants similar to input restaurant based on comparison of dishes
+## find restaurants similar to input restaurant based on comparison of dishes
 # # this should be precalculated, persisted -- move to data processing?
+# 1. get menu list for restaurant
+# 2. for other 
 
 
 # if __name__=="__main__":

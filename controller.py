@@ -84,9 +84,19 @@ def find_restaurant_by_name(name):
 def location_same_as_name(restaurant):
     return restaurant.name == restaurant.location
 
+
 def get_total_restaurants():
     count = model.session.query(model.Restaurant).count()
     return count
+
+def get_random_restaurant():
+    count = get_total_menus()
+    num = randint(1, count+1)
+    restaurant = model.session.query(model.Restaurant).get(num)
+    if restaurant == None:
+        restaurant = get_random_restaurant()
+    return restaurant
+
 
 
 # functions to get dishes / dish info

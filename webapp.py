@@ -20,14 +20,14 @@ def index():
     decade_list = controller.counts_for_all_decades()
     random_item = controller.get_random_dish()
     random_menu = controller.get_random_menu()
-    #random_restaurant = controller.get_random_restaurant()
-    # will implement this when restaurant dedup has been done
+    random_restaurant = controller.get_random_restaurant()
     menu_total = controller.get_total_menus()
     item_total = controller.get_total_dishes()
     restaurant_total = controller.get_total_restaurants()
     return render_template("index.html", decade_list=decade_list, 
                                          random_item=random_item,
                                          random_menu=random_menu,
+                                         random_restaurant=random_restaurant,
                                          menu_total=menu_total,
                                          restaurant_total=restaurant_total,
                                          item_total=item_total)
@@ -41,13 +41,25 @@ def about():
 @app.route("/item/<int:item_id>")
 def item_details(item_id):
     item = model.session.query(model.Item).get(item_id)
-    return render_template("item.html", item=item)
+    menus = []    
+    for i in item.menus:
+        if i.menu != None:
+            menus.append(i.menu)
+    menus = sorted(menus)
+    return render_template("item.html", item=item, menus=menus)
 
 
 @app.route("/menu/<int:menu_id>")
 def menu_details(menu_id):
     menu = model.session.query(model.Menu).get(menu_id)
-    return render_template("menu.html", menu=menu)
+    items = []
+    for i in menu.items:
+        items.append(i.item)
+    other_restaurant_menus = []
+    menus = menu.restaurant.menus
+    for j in menus:
+        other_restaurant_menus.append(j)
+    return render_template("menu.html", menu=menu, items=items, menus=menus)
 
 
 @app.route("/restaurant/<int:restaurant_id>")
