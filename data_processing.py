@@ -21,6 +21,16 @@ def build_dish_corpus():
     return dish_corpus
 
 
+def build_dish_corpus_no_tokens():
+# for fuzzy search
+    dish_list = model.session.query(model.Item).all()
+    dish_corpus = {}
+    for dish in dish_list:
+        text = (dish.description).lower().strip().strip('*')
+        dish_corpus[dish.id] = text
+    return dish_corpus
+
+
 def build_menu_corpus():  # what am I actually planning to use this for?
 # ngrams? collocations?
 # builds a dictionary where key is menu.id, value is tokenized list
@@ -46,17 +56,22 @@ def strip_prepositional_phrases(corpus):
         for i in range(len(tokens)):
             if tokens[i] in ['of', 'from', 'in', 'with', 'accompanied']:
                 tokens = tokens[0:(i-1)]
+    return corpus
+# not working -- why? index error
 
 
 def strip_stopwords(corpus):
 # take a corpus, remove stopwords from nltk stopword set
     stoplist = stopwords.words('english')
+    for word in stoplist:
+        word = word.encode('utf-8')
     for dish, words in corpus.items():
         for word in words:
             if word in stoplist:
                 del word
         corpus[dish] = words
     return corpus
+# not working -- why?
 
 
 # classification
@@ -84,36 +99,38 @@ def find_similarity_scores(item_id, dish_corpus):
 # for other dishes in the corpus. 
 # stemming???
     scores = {}
-    comparison_desc = ''.join(dish_corpus[item_id])
+    comparison_desc = dish_corpus[item_id]
     for item, desc in dish_corpus.items():
         if item_id != item:
-            score = fuzz.token_set_ratio(dish_corpus[comparison_desc],
-                                         ''.join(desc))
-            scores[item] = score
+            score = fuzz.token_set_ratio(comparison_desc, desc)
+            if score >= 80:
+                scores[item] = score
     return scores
 
 
 def rank_similarities(scores):
     ranked_scores = []
-    while len(ranked_scores) < 10:
-        for item, score in scores.items():
-            if score > .5:  # check results to see if this is reasonable cutoff
-                ranked_scores.append((score, item))
-    return sorted(ranked_scores)
+    for item, score in scores.items():
+        ranked_scores.append((score, item))
+    ranked_scores = sorted(ranked_scores, reverse=True)
+    top_25 = ranked_scores[0:25]
+    print top_25
+    return top_25
 
 
 def similar_dishes_for_corpus(dish_corpus):
 # Return a dictionary with each dish ID from corpus mapped to a list of dish IDs
-# of 10 similar dishes, ordered in descending order of similarity.
+# of 25 similar dishes, ordered in descending order of similarity.
     similarities = {}
-    for dish_id, text in dish_corpus.items():
+    for dish_id in dish_corpus.keys():
         scores = find_similarity_scores(dish_id, dish_corpus)
-        ranked_scores = rank_similarities(scores)    
-        similarities[dish_id] = similar_list
+        top_25 = rank_similarities(scores)    
+        similarities[dish_id] = top_25
     return similarities
 # (if this runs too slowly: refactor so that results get pushed to database as calculated
 # for each dish -- will need to add check to see if similar dishes have already been calculated
 # for each dish)
+
 
 def persist_similarities(similarities):
     for dish_id, ranked_scores in similarities:
@@ -145,7 +162,7 @@ def dishes_that_appear_with(dish):
     
 
 def appears_with_for_corpus(corpus):
-# call above fucntion for every dish in 
+# call above fucntion for every dish in corpus
     appearances = {}
     for dish_id, description in corpus.items():
         appearances [dish_id] = dishes_that_appear_with(dish_id)
@@ -158,13 +175,14 @@ def id_techniques(dish_id, corpus):
     dish_words = corpus[dish_id]
     techniques = []
     for word in dish_words:
-        suffix = (word[-2:]).encode('utf-8')
-        if suffix == 'ed':
-            techniques.append(word)
+        if len(word) > 2:
+            suffix = (word[-2:]).encode('utf-8')
+            if suffix == 'ed':
+                techniques.append(word)
     if len(techniques) > 0:
         return techniques
     else:
-        return None
+        return "unknown"
 
 
 def techniques_for_corpus(corpus):
@@ -178,7 +196,7 @@ def techniques_for_corpus(corpus):
 
 def map_techniques_to_dishes(dishes_to_techniques):
     techniques_to_dishes = {}
-    false_matches = {'bed': 0, 'red': 0, 'served': 0, 'assorted': 0}
+    false_matches = {'k': 0, 'bed': 0, 'red': 0, 'served': 0, 'assorted': 0}
     for dish_id, techniques in dishes_to_techniques.items():
         for c in techniques:
             if c not in false_matches:
@@ -216,17 +234,21 @@ def sort_technique_frequencies(technique_freq):
     return sorted_technique_freq
 
 
-def id_category(dish):
+# def id_category(dish, corpus):
 # is this dish an entree? a side dish? dessert? breakfast? beverage? salad?
 # soup? attempt to implement w/ supervised classification -- go through subset
 # of dish descriptions, create a training set?
-    pass
+    # for dish, tokens in corpus.items():
+    #     for word in tokens:
+    #         if [word in lexicon]
+          # for word in tokens:
+
 
 
 def categories_for_corpus(corpus):
     dishes_to_categories = {}
     for dish_id, text in corpus.items():
-        category = id_category(dish_id)
+        category = id_category(dish_id, corpus)
         dishes_to_categories[dish_id] = category
     return dishes_to_categories
 
@@ -326,6 +348,6 @@ def find_unclassified(category):
 # 2. for other 
 
 
-# if __name__=="__main__":
-#     corpus = build_dish_corpus()
-#     lexicon = lexicon_setup()
+if __name__=="__main__":
+    corpus = build_dish_corpus()
+    # lexicon = lexicon_setup()

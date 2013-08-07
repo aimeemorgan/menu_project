@@ -4,7 +4,12 @@
     <title>Historic Menus OMG</title>
     <h1>Item details for {{ item.description }} (item #{{ item.id }})</h1>
     <p>Category: {{ item.category }} [See other items in this category]</p>
-    <p>Technique: {{ item.techniques }} [See other items with this technique]</p>
+    <p>Technique(s):</p>
+    <ul> 
+        {% for technique in item.techniques %}
+            <li><a href="../technique/{{ technique.id }}">{{ technique.technique.name }}</a></li>
+        {% endfor %}
+    </ul>
     <p>Date of first appearance: {{ item.first_year.year }}/{{ item.first_year.month }}/{{ item.first_year.day }} </p>
     <p>Date of latest appearance: {{ item.latest_year.year }}/{{ item.latest_year.month }}/{{ item.latest_year.day }} </p>
     <p>Lowest price: ${{ item.low_price }} </p>

@@ -46,7 +46,8 @@ def item_details(item_id):
         if i.menu != None:
             menus.append(i.menu)
     menus = sorted(menus)
-    return render_template("item.html", item=item, menus=menus)
+    menu_count = len(menus)
+    return render_template("item.html", item=item, menus=menus, count=menu_count)
 
 
 @app.route("/menu/<int:menu_id>")
@@ -55,17 +56,30 @@ def menu_details(menu_id):
     items = []
     for i in menu.items:
         items.append(i.item)
+    item_count = len(items)
     other_restaurant_menus = []
     menus = menu.restaurant.menus
     for j in menus:
         other_restaurant_menus.append(j)
-    return render_template("menu.html", menu=menu, items=items, menus=menus)
+    menu_count = len(menus)
+    return render_template("menu.html", menu=menu, 
+                                        items=items, 
+                                        menus=menus,
+                                        item_count=item_count,
+                                        menu_count=menu_count)
 
 
 @app.route("/restaurant/<int:restaurant_id>")
 def restaurant_details(restaurant_id):
     restaurant = model.session.query(model.Restaurant).get(restaurant_id)
-    return render_template("restaurant.html", restaurant=restaurant)
+    menu_count = len(restaurant.menus)
+    return render_template("restaurant.html", restaurant=restaurant, count=menu_count)
+
+
+@app.route("/technique/<int:technique_id>")
+def technique_details(technique_id):
+    technique = model.session.query(model.Technique).get(technique_id)
+    return render_template("technique.html", technique=technique)
 
 
 @app.route("/explore_techniques")
@@ -81,6 +95,11 @@ def explore_categories():
 @app.route("/explore_decades")
 def explore_decades():
     return render_template("explore_decades.html")
+
+
+@app.route("/item_results")
+def item_results():
+    return render_template("item_results.html")
 
 
 

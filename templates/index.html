@@ -34,8 +34,10 @@
        <div id="chart_div" style="width: 1200px; height: 500px;"></div>
     <h2>Ways to Explore</h2>
     <ul>
-    <li>Search by keyword in descriptions of menu items</li>
-    <li>Search by keyword in restaurant names</li>
+    <li>Search by keyword in descriptions of menu items: <form action="/item_results">
+      <input type="text" name="search" /><input type="submit">
+    </form></li>
+    <li>Search by keyword in restaurant names: <form action="/restaurant_results"><input type="text" name="search" /><input type="submit"></form></li>
     <li><a href="./explore_decades">Browse menus by decade</a></li>
     <li><a href="./explore_techniques">Browse menu items by cooking techniques</a></li>
     <li><a href="./explore_categories">Browse menu items by category</a></li>
@@ -45,7 +47,7 @@
     <p><a href="./item/{{ random_item.id }}">{{ random_item.description }}</a></p>
     <h3>Random menu from the collection</h3>
     <p><a href="./menu/{{ random_menu.id }}">{{ random_menu.restaurant.name }}, {{ random_menu.date.year }}/{{ random_menu.date.month }}/{{ random_menu.date.day }}</a></p>
-    <h3>Random menu item from the collection</h3>
+    <h3>Random restaurant from the collection</h3>
     <p><a href="./restaurant/{{ random_restaurant.id }}">{{ random_restaurant.name }}</a></p>
     <p><a href="./about">More information about the menu project</a></p>
   </body>

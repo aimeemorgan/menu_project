@@ -6,10 +6,10 @@
     <p>Location info: {{ restaurant.location }}</p>
     <p>Earliest menu date:</p>
     <p>Latest menu date:</p>
-    <h2>Menus from this restaurant: [ADD COUNT]</h2>
+    <h2>Menus from this restaurant ({{ count }} total):</h2>
     <ul>
     {% for menu in restaurant.menus %}
-        <li><a href="../menu/{{ menu].id }}">{{ menu.date.year }}/{{ menu.date.month }}/{{ menu.date.day }}</a></li>
+        <li><a href="../menu/{{ menu.id }}">{{ menu.date.year }}/{{ menu.date.month }}/{{ menu.date.day }}</a></li>
     {% endfor %}
     </ul>
     <h2>Other similar restaurants in the collection:</h2>
