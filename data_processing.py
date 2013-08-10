@@ -7,25 +7,14 @@ from datetime import datetime
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
-
-def redis_test():
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    r.set('foo', 'bar')
-    return r.get('foo')
-
 # preprocessing
 
 def build_itemid_index():
     item_list = model.session.query(model.Item).all()
-    itemid_index = [item.id for item in item_list]
     r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    r.set('itemid_index', itemid_index)
+    for item in item_list:
+        r.lpush('itemid_index', item.id)
     r.save
-
-
-# def get_itemid_index():
-#      r = redis.StrictRedis(host='localhost', port=6379, db=0)
-#      r.get(itemid_index)
 
 
 def build_dish_corpus():
@@ -68,20 +57,23 @@ def build_menu_corpus():  # what am I actually planning to use this for?
     return menu_corpus
 
 
-def persist_corpus(corpus):
+def persist_corpus(name, corpus):
     r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    for key, value in corpus.items():
-        r.set((item + '.%s'), value) % key
+    for item_id, tokens in corpus.items():
+        for token in tokens:
+            key = (name +':%s') % item_id
+            r.lpush(key, token)
     r.save
 
 
-def load_corpus(item_index_name):
+def load_corpus(item_index_name, corpus_prefix):
     r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    index = r.get(item_index_name)
+    index = r.lrange(item_index_name, 0, -1)
     corpus = {}
     for item in index:
-        value = r.get(item)
-        corpus[item] = value
+        key =  corpus_prefix + ':%s' % item
+        values = r.lrange(key, 0, -1)
+        corpus[int(item)] = values
     return corpus
 
 
@@ -125,6 +117,32 @@ def word_frequencies(corpus):
     return frequencies
 
 
+def build_word_index(freq):
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    for word in freq.keys():
+        r.lpush('word_index', word)
+    r.save
+
+
+def persist_word_frequencies(frequencies):
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)    
+    for word, freq in frequencies.items():
+            key = ('frequency:%s') % word
+            r.lpush(key, freq)
+    r.save
+
+
+def load_word_frequencies():
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)  
+    index = r.lrange('word_index', 0, -1)
+    freq = {}
+    for word in index:
+        key =  'frequency:%s' % word
+        value = r.lrange(key, 0, -1)
+        freq[word] = value
+    return freq
+
+
 def most_frequent_sorted(frequencies):
     ranked_freq = []
     for word, count in frequencies.items():
@@ -132,39 +150,39 @@ def most_frequent_sorted(frequencies):
     return sorted(ranked_freq)
 
 
-def find_similarity_scores(item_id, dish_corpus):
-# for a given dish, use fuzzy search to calculate similarity scores
-# for other dishes in the corpus. 
-    scores = {}
-    comparison_desc = dish_corpus[item_id]
-    for item, desc in dish_corpus.items():
-        if item_id != item:
-            score = fuzz.token_set_ratio(comparison_desc, desc)
-            if score >= 90:
-                scores[item] = score
-    return scores
+# def find_similarity_scores(item_id, dish_corpus):
+# # for a given dish, use fuzzy search to calculate similarity scores
+# # for other dishes in the corpus. 
+#     scores = {}
+#     comparison_desc = dish_corpus[item_id]
+#     for item, desc in dish_corpus.items():
+#         if item_id != item:
+#             score = fuzz.token_set_ratio(comparison_desc, desc)
+#             if score >= 90:
+#                 scores[item] = score
+#     return scores
 
 
-def rank_similarities(scores):
-    ranked_scores = []
-    for item, score in scores.items():
-        ranked_scores.append((score, item))
-    ranked_scores = sorted(ranked_scores, reverse=True)
-    top_25 = ranked_scores[0:25]
-    print top_25
-    return top_25
+# def rank_similarities(scores):
+#     ranked_scores = []
+#     for item, score in scores.items():
+#         ranked_scores.append((score, item))
+#     ranked_scores = sorted(ranked_scores, reverse=True)
+#     top_25 = ranked_scores[0:25]
+#     print top_25
+#     return top_25
 
 
-def similar_dishes_for_corpus(dish_corpus):
+# def similar_dishes_for_corpus(dish_corpus):
 # Return a dictionary with each dish ID from corpus mapped to a list of dish IDs
 # of 25 similar dishes, ordered in descending order of similarity.
 # refactor so that dishes are removed from the corpus as they are matched
-    similarities = {}
-    for dish_id in dish_corpus.keys():
-        scores = find_similarity_scores(dish_id, dish_corpus)
-        top_25 = rank_similarities(scores)    
-        similarities[dish_id] = top_25
-    return similarities
+    # similarities = {}
+    # for dish_id in dish_corpus.keys():
+    #     scores = find_similarity_scores(dish_id, dish_corpus)
+    #     top_25 = rank_similarities(scores)    
+    #     similarities[dish_id] = top_25
+    # return similarities
 
 # refactor to persist in redis
 # def persist_similarities(similarities):
@@ -255,6 +273,7 @@ def persist_techniques(techniques_to_dishes):
             model.session.commit()
             itemtechnique_id += 1
         technique_id += 1
+
 
 def find_technique_frequencies(techniques_to_dishes):
     technique_freq = {}

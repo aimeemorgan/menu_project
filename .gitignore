@@ -1,3 +1,4 @@
+dump.rdb
 redis-stable
 ref_files
 *.pyc
