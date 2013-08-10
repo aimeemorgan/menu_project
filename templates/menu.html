@@ -1,7 +1,7 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Historic Menus OMG</title>
+{% extends "layout.html" %}
+{% block head %}
+{% endblock %}
+{% block content %}
     <h1>Menu details for menu #{{ menu.id }}</h1>
     <p><a href="../restaurant/{{ menu.restaurant.id }}">{{ menu.restaurant.name }}</a>, {{ menu.date.year }}/{{ menu.date.month }}/{{ menu.date.day }}</p>
     <h2>Items on this menu ({{ item_count }} total)</h2>
@@ -20,5 +20,6 @@
     </ul>
     <h2>Other similar menus in the collection
    	<p>[list goes here]</p>
-  </body>
-</html>
+{% endblock %}
+{% block footer %}
+{% endblock %}

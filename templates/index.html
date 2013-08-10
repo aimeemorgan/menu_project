@@ -1,7 +1,5 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Historic Menus OMG</title>
+{% extends "layout.html" %}
+{% block head %}
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
@@ -20,18 +18,19 @@
         var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
         chart.draw(data, options);
       }
-    </script>
-  </head>
-  <body>
+      </script>
+{% endblock %}
+
+{% block content %}
     <h1>Hello, world!</h1>
-    <p>Explore the New York Public Library's "What's on the Menu dataset"</p>
+    <p>Explore the New York Public Library's "What's on the Menu" dataset</p>
     <h2>Current Stats</h2>
     <ul>
       <li>Total menu items: {{ item_total }}</li>
       <li>Total menus: {{ menu_total }}</li>
       <li>Total unique restaurants: {{ restaurant_total }}</li>
     </ul> 
-       <div id="chart_div" style="width: 1200px; height: 500px;"></div>
+       <div id="chart_div" style="width: 1100px; height: 500px;"></div>
     <h2>Ways to Explore</h2>
     <ul>
     <li>Search by keyword in descriptions of menu items: <form action="/item_results">
@@ -50,5 +49,5 @@
     <h3>Random restaurant from the collection</h3>
     <p><a href="./restaurant/{{ random_restaurant.id }}">{{ random_restaurant.name }}</a></p>
     <p><a href="./about">More information about the menu project</a></p>
-  </body>
-</html>
+  {% endblock %}
+

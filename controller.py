@@ -89,6 +89,7 @@ def get_total_restaurants():
     count = model.session.query(model.Restaurant).count()
     return count
 
+
 def get_random_restaurant():
     count = get_total_menus()
     num = randint(1, count+1)
@@ -105,6 +106,7 @@ def get_random_restaurant():
 def find_dishes_by_keyword(keyword):
     dishes = model.session.query(model.Item).filter(model.Item.description.like('%' + keyword + '%')).all()
     return dishes
+
 
 def find_dishes_by_technique(technique):
     dishes = model.session.query(model.Item).filter(model.Item.technique.like('%' + technique + '%')).all()
@@ -184,12 +186,13 @@ def dish_frequency_decade_sorted(dish_frequencies):
     return sorted(freq)
 
 
-def get_similar_dishes(dish, num):
+def get_similar_dishes(dish_id, num):
 # return a list of <num> dishes that are most similar to <dish>
-    item = model.session.query(model.Restaurant).get(dish)
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    similarities = r.get(itemid_index)
     results = []
-    for s in item.similarities:
-        results.append(s.score, s.item_id_2)
+    for s in similarities:
+        # results.append(s.score, s.item_id_2) -- this needs refinement
     results = sorted(results)
     return results[0:num]
 

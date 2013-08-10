@@ -1,6 +1,7 @@
-<!DOCTYPE html>
-<html>
-  <head>
+{% extends "layout.html" %}
+{% block head %}
+{% endblock %}
+{% block content %}
     <title>Historic Menus OMG</title>
     <h1>Item details for {{ item.description }} (item #{{ item.id }})</h1>
     <p>Category: {{ item.category }} [See other items in this category]</p>
@@ -29,5 +30,6 @@
     <h2>Items which frequently appear on menus with this one</h2>
     <p>[list of items goes here]
     <h3>chart with this item's appearances on menus over time?</h3>
-  </body>
-</html>
+{% endblock %}
+{% block footer %}
+{% endblock %}

@@ -1,7 +1,7 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Historic Menus OMG</title>
+{% extends "layout.html" %}
+{% block head %}
+{% endblock %}
+{% block content %}
     <h1>Restaurant details for {{ restaurant.name }}</h1>
     <p>Location info: {{ restaurant.location }}</p>
     <p>Earliest menu date:</p>
@@ -14,5 +14,6 @@
     </ul>
     <h2>Other similar restaurants in the collection:</h2>
     <p>[list goes here]</p>
-  </body>
-</html
+{% endblock %}
+{% block footer %}
+{% endblock %}

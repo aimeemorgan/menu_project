@@ -1,5 +1,6 @@
 import model
 import nltk
+import redis
 from nltk.corpus import stopwords
 #from lexicon import lexicon_names, lexicon_setup
 from datetime import datetime 
@@ -7,7 +8,25 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
 
+def redis_test():
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    r.set('foo', 'bar')
+    return r.get('foo')
+
 # preprocessing
+
+def build_itemid_index():
+    item_list = model.session.query(model.Item).all()
+    itemid_index = [item.id for item in item_list]
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    r.set('itemid_index', itemid_index)
+    r.save
+
+
+# def get_itemid_index():
+#      r = redis.StrictRedis(host='localhost', port=6379, db=0)
+#      r.get(itemid_index)
+
 
 def build_dish_corpus():
 # builds a dictionary where key is item.id, value is item.description
@@ -49,6 +68,23 @@ def build_menu_corpus():  # what am I actually planning to use this for?
     return menu_corpus
 
 
+def persist_corpus(corpus):
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    for key, value in corpus.items():
+        r.set((item + '.%s'), value) % key
+    r.save
+
+
+def load_corpus(item_index_name):
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    index = r.get(item_index_name)
+    corpus = {}
+    for item in index:
+        value = r.get(item)
+        corpus[item] = value
+    return corpus
+
+
 def strip_prepositional_phrases(corpus):
 # strip out prepositional phrases as pre-classification step
 # (i.e. "with...", "in..." "accompanied by...")
@@ -63,15 +99,17 @@ def strip_prepositional_phrases(corpus):
 def strip_stopwords(corpus):
 # take a corpus, remove stopwords from nltk stopword set
     stoplist = stopwords.words('english')
-    for word in stoplist:
-        word = word.encode('utf-8')
-    for dish, words in corpus.items():
-        for word in words:
+    print stoplist
+    for entry in stoplist:
+        entry = entry.encode('utf-8')
+    corpus = dict(corpus)
+    for dish, description in corpus.items():
+        for word in description:
             if word in stoplist:
-                del word
-        corpus[dish] = words
+                description.remove(word)
+        corpus[dish] = description
     return corpus
-# not working -- why?
+
 
 
 # classification
@@ -97,13 +135,12 @@ def most_frequent_sorted(frequencies):
 def find_similarity_scores(item_id, dish_corpus):
 # for a given dish, use fuzzy search to calculate similarity scores
 # for other dishes in the corpus. 
-# stemming???
     scores = {}
     comparison_desc = dish_corpus[item_id]
     for item, desc in dish_corpus.items():
         if item_id != item:
             score = fuzz.token_set_ratio(comparison_desc, desc)
-            if score >= 80:
+            if score >= 90:
                 scores[item] = score
     return scores
 
@@ -121,28 +158,26 @@ def rank_similarities(scores):
 def similar_dishes_for_corpus(dish_corpus):
 # Return a dictionary with each dish ID from corpus mapped to a list of dish IDs
 # of 25 similar dishes, ordered in descending order of similarity.
+# refactor so that dishes are removed from the corpus as they are matched
     similarities = {}
     for dish_id in dish_corpus.keys():
         scores = find_similarity_scores(dish_id, dish_corpus)
         top_25 = rank_similarities(scores)    
         similarities[dish_id] = top_25
     return similarities
-# (if this runs too slowly: refactor so that results get pushed to database as calculated
-# for each dish -- will need to add check to see if similar dishes have already been calculated
-# for each dish)
 
-
-def persist_similarities(similarities):
-    for dish_id, ranked_scores in similarities:
-        similarity_id = 0
-        for item in ranked_scores:
-            new_similarity = new_itemsimilarity = model.ItemSimilarity(
-                                                    id = similarity_id,
-                                                    item_id_1 = dish_id,
-                                                    item_id_2 = item[1],
-                                                    score = item[0])
-            session.add(new_similarity)
-            session.commit()
+# refactor to persist in redis
+# def persist_similarities(similarities):
+#     for dish_id, ranked_scores in similarities:
+#         similarity_id = 0
+#         for item in ranked_scores:
+#             new_similarity = new_itemsimilarity = model.ItemSimilarity(
+#                                                     id = similarity_id,
+#                                                     item_id_1 = dish_id,
+#                                                     item_id_2 = item[1],
+#                                                     score = item[0])
+#             session.add(new_similarity)
+#             session.commit()
 
 
 
@@ -196,12 +231,13 @@ def techniques_for_corpus(corpus):
 
 def map_techniques_to_dishes(dishes_to_techniques):
     techniques_to_dishes = {}
-    false_matches = {'k': 0, 'bed': 0, 'red': 0, 'served': 0, 'assorted': 0}
+    false_matches = {'bed': 0, 'red': 0, 'served': 0, 'assorted': 0}
     for dish_id, techniques in dishes_to_techniques.items():
         for c in techniques:
             if c not in false_matches:
-                techniques_to_dishes.setdefault(c, [])
-                techniques_to_dishes[c].append(dish_id)
+                if len(c) > 1:
+                    techniques_to_dishes.setdefault(c, [])
+                    techniques_to_dishes[c].append(dish_id)
     return techniques_to_dishes
 
 
@@ -231,6 +267,7 @@ def sort_technique_frequencies(technique_freq):
     sorted_technique_freq = []
     for technique, frequency in technique_freq.items():
         sorted_technique_freq.append((frequency, technique))
+        sorted_technique_freq = sorted(sorted_technique_freq)
     return sorted_technique_freq
 
 
@@ -348,6 +385,6 @@ def find_unclassified(category):
 # 2. for other 
 
 
-if __name__=="__main__":
-    corpus = build_dish_corpus()
-    # lexicon = lexicon_setup()
+# if __name__=="__main__":
+#     corpus = build_dish_corpus()
+#     # lexicon = lexicon_setup()
