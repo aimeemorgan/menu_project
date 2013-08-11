@@ -176,6 +176,7 @@ class ItemTechnique(Base):
   
     item = relationship("Item", backref=backref("itemtechniques"))
     technique = relationship("Technique", backref=backref("itemtechniques"))
+   
     
 # going to persist this info in redis instead....
 # class ItemSimilarity(Base):

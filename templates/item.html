@@ -21,12 +21,12 @@
         <li><a href="../menu/{{ menu.id }}">{{ menu.restaurant.name }} {{ menu.date.year }}/{{ menu.date.month }}/{{ menu.date.day }}</a></li>
     {% endfor %}
     </ul>
-    <h2>Other similar items in the collection</h2>
-    <ul>
-    {% for item in similar_items %}
-        <li><a href="../item/{{ item.id }}">{{ item.description }}</a></li>
+    <h2>Similar items in the collection</h2>
+<!--     <ul>
+    {% for s in similarities %}
+        <li><a href="../item/{{ item.id }}">{{ s.description }}</a></li>
     {% endfor %}
-    </ul>
+    </ul> -->
     <h2>Items which frequently appear on menus with this one</h2>
     <p>[list of items goes here]
     <h3>chart with this item's appearances on menus over time?</h3>

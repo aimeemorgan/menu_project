@@ -47,7 +47,12 @@ def item_details(item_id):
             menus.append(i.menu)
     menus = sorted(menus)
     menu_count = len(menus)
-    return render_template("item.html", item=item, menus=menus, count=menu_count)
+    # similarities = controller.get_similar_dishes(item_id)
+    return render_template("item.html", item=item, 
+                                        menus=menus,
+                                        # similarities=similarities,
+                                        count=menu_count
+                                        )
 
 
 @app.route("/menu/<int:menu_id>")
@@ -62,11 +67,14 @@ def menu_details(menu_id):
     for j in menus:
         other_restaurant_menus.append(j)
     menu_count = len(menus)
+    # similarities = controller.get_similar_menus(menu_id)
     return render_template("menu.html", menu=menu, 
                                         items=items, 
                                         menus=menus,
                                         item_count=item_count,
-                                        menu_count=menu_count)
+                                        # similarities=similarities,
+                                        menu_count=menu_count
+                                        )
 
 
 @app.route("/restaurant/<int:restaurant_id>")
@@ -99,9 +107,26 @@ def explore_decades():
 
 @app.route("/item_results")
 def item_results():
-    return render_template("item_results.html")
+    keyword = request.args.get("search")
+    results = controller.find_dishes_by_keyword(keyword)
+    if results == False:
+        results = ["No results found."]
+    count = len(results)
+    return render_template("item_results.html", keyword=keyword, 
+                                                results=results,
+                                                count=count)
 
 
+@app.route("/restaurant_results")
+def restaurant_results():
+    keyword = request.args.get("search")
+    results = controller.find_dishes_by_keyword(keyword)
+    if results == False:
+        results = ["No results found."]
+    count = len(results)
+    return render_template("item_results.html", keyword=keyword, 
+                                                results=results,
+                                                count=count)
 
 if __name__ == "__main__":
     app.run(debug=True)  # turn off debug in production!

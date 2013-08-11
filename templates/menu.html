@@ -18,8 +18,12 @@
         <li><a href="../menu/{{ menu.id }}">{{ menu.restaurant.name }}, {{ menu.date.year }}</a></li>
     {% endfor %}
     </ul>
-    <h2>Other similar menus in the collection
-   	<p>[list goes here]</p>
+    <h2>Similar menus in the collection</h2>
+   	<ul>
+    {% for s in similarities %}
+        <li><a href="../item/{{ menu.id }}">{{ s.restaurant.name }}, {{ s.date.year }}</a></li>
+    {% endfor %}
+    </ul>
 {% endblock %}
 {% block footer %}
 {% endblock %}

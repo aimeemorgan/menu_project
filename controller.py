@@ -1,4 +1,5 @@
 import model
+import redis
 from datetime import datetime
 from random import randint
 
@@ -73,6 +74,15 @@ def get_random_menu():
     return menu
 
 
+def get_similar_menus(menu_id):
+# return list of dishes that are most similar to <dish>
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    results = r.lrange('menu_similarities:%s') % menu_id
+    results_by_score = [(s[1], s[0]) for s in results]
+    sorted_by_score = sorted(results_by_score)
+    results = [s[1] for s in sorted_by_score]
+    return results
+
 # functions to get restaurants / restautant info
 
 
@@ -99,7 +109,6 @@ def get_random_restaurant():
     return restaurant
 
 
-
 # functions to get dishes / dish info
 
 
@@ -111,7 +120,6 @@ def find_dishes_by_keyword(keyword):
 def find_dishes_by_technique(technique):
     dishes = model.session.query(model.Item).filter(model.Item.technique.like('%' + technique + '%')).all()
     return dishes
-    pass
 
 
 def find_dishes_by_category(category):
@@ -186,15 +194,14 @@ def dish_frequency_decade_sorted(dish_frequencies):
     return sorted(freq)
 
 
-def get_similar_dishes(dish_id, num):
-# return a list of <num> dishes that are most similar to <dish>
+def get_similar_dishes(dish_id):
+# return list of dishes that are most similar to <dish>
     r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    similarities = r.get(itemid_index)
-    results = []
-    for s in similarities:
-        # results.append(s.score, s.item_id_2) -- this needs refinement
-    results = sorted(results)
-    return results[0:num]
+    results = r.lrange('similarities:%s') % dish_id
+    results_by_score = [(s[1], s[0]) for s in results]
+    sorted_by_score = sorted(results_by_score)
+    results = [s[1] for s in sorted_by_score]
+    return results
 
 
 def get_total_dishes():
