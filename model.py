@@ -53,8 +53,6 @@ class Menu(Base):
     sponsor = Column(String)
 
     items = relationship("MenuItem", backref=backref("menus"))
-    #similar_menus = relationship("MenuSimilarity", backref=backref("menus"))
-
 
     def __repr__(self):
         return '<%s, %s>' % (self.date,
@@ -79,12 +77,12 @@ class Item(Base):
     latest_year = Column(DateTime, nullable=True)
     low_price = Column(Float, nullable=True)
     high_price = Column(Float, nullable=True)
-    category = Column(Integer, ForeignKey('categories.id'), nullable=True)
+    # category = Column(Integer, ForeignKey('categories.id'), nullable=True)
 
     menus = relationship("MenuItem", backref=backref("items"))
     techniques = relationship("ItemTechnique", backref=backref("items"))
     ingredients = relationship("ItemIngredient", backref=backref("items"))
-    #similar_items = relationship("ItemSimilarity", backref=backref("items"))
+
 
 
     def __repr__(self):
@@ -125,13 +123,13 @@ class Technique(Base):
     items = relationship("ItemTechnique", backref=backref("techniques"))
 
 
-class Category(Base):
-    __tablename__ = "categories"
+# class Category(Base):
+#     __tablename__ = "categories"
 
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+#     id = Column(Integer, primary_key=True)
+#     name = Column(String, nullable=False)
 
-    items = relationship("Item", backref=backref("categories"))
+#     items = relationship("Item", backref=backref("categories"))
 
 
 class Ingredient(Base):
@@ -177,43 +175,6 @@ class ItemTechnique(Base):
     item = relationship("Item", backref=backref("itemtechniques"))
     technique = relationship("Technique", backref=backref("itemtechniques"))
    
-    
-# going to persist this info in redis instead....
-# class ItemSimilarity(Base):
-#     __tablename__ = "itemsimilarities"
-
-#     id = Column(Integer, primary_key=True)
-#     item_id_1 = Column(Integer, ForeignKey('items.id'), nullable=False)
-#     item_id_2 = Column(Integer, nullable=False)
-#     score = Column(Float, nullable=False)
-
-#     similar_items = relationship("Item", backref=backref("similarities"))
-# #   this setup will result in each relationship being recorded twice -- better way?
-
-
-# class RestaurantSimilarity(Base):
-#     __tablename__ = "restaurantsimilarities"
-
-#     id = Column(Integer, primary_key=True)
-#     restaurant_id_1 = Column(Integer, ForeignKey('restaurants.id'), nullable=False)
-#     restaurant_id_2 = Column(Integer, nullable=False)
-#     score = Column(Float, nullable=False)
-
-#     similar_restaurants = relationship("Restaurant", backref=backref("similarities"))
-
-
-# class MenuSimilarity(Base):
-#     __tablename__ = "menusimilarities"
-
-#     id = Column(Integer, primary_key=True)
-#     menu_id_1 = Column(Integer, ForeignKey('menus.id'), nullable=False)
-#     menu_id_2 = Column(Integer, nullable=False)
-#     score = Column(Float, nullable=False)
-
-#     similar_menus = relationship("Menu", backref=backref("similarities"))
-
-### End class declarations
-
 
 def main():
     pass

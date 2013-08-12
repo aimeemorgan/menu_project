@@ -2,6 +2,7 @@ import model
 import nltk
 import redis
 import re
+from controller import find_menus_by_year, find_menus_by_decade
 from nltk.corpus import stopwords
 #from lexicon import lexicon_names, lexicon_setup
 
@@ -80,21 +81,6 @@ def strip_prepositional_phrases(corpus):
                 tokens = tokens[0:(i-1)]
     return corpus
 # not working -- why? index error
-
-
-def strip_stopwords(corpus):
-# take a corpus, remove stopwords from nltk stopword set
-    stoplist = stopwords.words('english')
-    print stoplist
-    for entry in stoplist:
-        entry = entry.encode('utf-8')
-    corpus = dict(corpus)
-    for dish, description in corpus.items():
-        for word in description:
-            if word in stoplist:
-                description.remove(word)
-        corpus[dish] = description
-    return corpus
 
 
 # classification
@@ -211,72 +197,91 @@ def sort_technique_frequencies(technique_freq):
     return sorted_technique_freq
 
 
-def id_category(dish, corpus):
-# is this dish an entree? a side dish? dessert? breakfast? beverage? salad?
-# soup? attempt to implement w/ supervised classification -- go through subset
-# of dish descriptions, create a training set?
-    # for dish, tokens in corpus.items():
-    #     for word in tokens:
-    #         if [word in lexicon]
-          # for word in tokens:
-    pass
 
 
-def categories_for_corpus(corpus):
-    dishes_to_categories = {}
-    for dish_id, text in corpus.items():
-        category = id_category(dish_id, corpus)
-        dishes_to_categories[dish_id] = category
-    return dishes_to_categories
+def most_popular_dishes(year):
+# for a given year, get list of dishes ordered by
+# how often they appear on menus
+    menus = find_menus_by_year(year)
+    all_items = {}
+    frequencies = []
+    for menu in menus:
+        items = menu.get_items()
+        for item in items:
+            if item != False:
+                all_items.setdefault(item, 0)
+                all_items[item] +=1
+    for item, count in all_items.items():
+        frequencies.append((count, item))
+    frequencies = sorted(frequencies, reverse=True)
+    return frequencies[0:10]
 
 
-def map_categories_to_dishes(dishes_to_categories):
-    categories_to_dishes = {}
-    for dish_id, categories in dishes_to_categories.items():
-        for c in categories:
-            categories_to_dishes.setdefault(c, [])
-            categories_to_dishes[c].append(dish_id)
-    return categories_to_dishes
+def most_popular_dishes_decade(decade):
+    menus = find_menus_by_decade(decade)
+    all_items = {}
+    frequencies = []
+    for menu in menus:
+        items = menu.get_items()
+        for item in items:
+            if item != False:
+                print item
+                all_items.setdefault(item, 0)
+                all_items[item] +=1
+    for item, count in all_items.items():
+        frequencies.append((count, item))
+    frequencies = sorted(frequencies, reverse=True)
+    return frequencies[0:10]
 
 
-def persist_categories(categories_to_dishes):
-    category_id = 1
-    for category, dishes in categories_to_dishes.items():
-        new_category = model.Category(name=category, id=category_id)
-        model.session.add(new_category)
-        for dish in dishes:
-            item = model.session.query(model.Item).get(dish)
-            item.category = category_id
-            model.session.add(item)
-        model.session.commit()
-        category_id += 1
+def most_popular_all_years():
+# return a dict where key = year, value = list of 10 most
+# popular dishes
+    most_popular = {}
+    for year in range(1949, 2010):
+        items = most_popular_dishes(year)
+        most_popular.setdefault(year, [])
+        if items:
+            for item in items:
+                if item != None:
+                    most_popular[year].append(item[1].id)
+            persist_most_popular_years(year, most_popular)
+            print year, most_popular[year]
+    return most_popular
 
 
-def find_category_frequencies(categories_to_dishes):
-    category_freq = {}
-    for category, dishes in categories_to_dishes.items():
-        category_freq[category] = len(dishes)
-    return category_freq
+def most_popular_all_decades():
+    most_popular = {}
+    for decade in range(1850, 2011, 10):
+        items = most_popular_dishes_decade(decade)
+        most_popular.setdefault(decade, [])
+        if items:
+            for item in items:
+                if item != None:
+                    print item
+                    most_popular[decade].append(item[1].id)
+            persist_most_popular_decades(decade, most_popular)
+            print decade, most_popular[decade]
+    return most_popular
 
 
-def sort_category_frequencies(category_freq):
-    sorted_category_freq = []
-    for category, frequency in category_freq.items():
-        sorted_category_freq.append((frequency, category))
-    return sorted_category_freq
+def persist_most_popular_years(year, most_popular):
+    r = redis.StrictRedis(host='holocalhost', port=6379, db=0)
+    items = most_popular[year] 
+    for item in items:
+        key = ('popular_year:%s') % year
+        r.lpush(key, item)
+    r.save
 
 
+def persist_most_popular_decades(decade, most_popular):
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    items = most_popular[decade] 
+    for item in items:
+        key = ('popular_decade:%s') % decade
+        r.lpush(key, item)
+    r.save
 
-###########################################
-# postprocessing
-
-# some kind of master function for reading classification info
-# from dictionaries, writing to csv files for import to database for webapp
-# (likely to be called from within classification subfunctions)
-# try it using above functions first - -see how slow it is.
-
-
-###########################################
 
 
 # helper functions
@@ -285,4 +290,5 @@ def find_unclassified(category):
 # find dishes that lack a classification term for a given
 # category (to aid in refinement of classification)
     pass
+
 

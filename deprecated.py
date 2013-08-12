@@ -134,3 +134,17 @@
 #         text = (dish.description).lower().strip().strip('*')
 #         dish_corpus[dish.id] = text
 #     return dish_corpus
+
+# def strip_stopwords(corpus):
+# # take a corpus, remove stopwords from nltk stopword set
+#     stoplist = stopwords.words('english')
+#     print stoplist
+#     for entry in stoplist:
+#         entry = entry.encode('utf-8')
+#     corpus = dict(corpus)
+#     for dish, description in corpus.items():
+#         for word in description:
+#             if word in stoplist:
+#                 description.remove(word)
+#         corpus[dish] = description
+#     return corpus

@@ -18,6 +18,7 @@ def shutdown_session(exception=None):
 def index():
     # generate counts for main map of menus by decade
     decade_list = controller.counts_for_all_decades()
+    print decade_list
     random_item = controller.get_random_dish()
     random_menu = controller.get_random_menu()
     random_restaurant = controller.get_random_restaurant()
@@ -45,12 +46,12 @@ def item_details(item_id):
     for i in item.menus:
         if i.menu != None:
             menus.append(i.menu)
-    menus = sorted(menus)
+    menus = sorted(menus, reverse=True)
     menu_count = len(menus)
-    # similarities = controller.get_similar_dishes(item_id)
+    similarities = controller.get_similar_dishes(item_id)
     return render_template("item.html", item=item, 
                                         menus=menus,
-                                        # similarities=similarities,
+                                        similarities=similarities,
                                         count=menu_count
                                         )
 
@@ -73,15 +74,18 @@ def menu_details(menu_id):
                                         menus=menus,
                                         item_count=item_count,
                                         # similarities=similarities,
-                                        menu_count=menu_count
-                                        )
+                                        menu_count=menu_count)
 
 
 @app.route("/restaurant/<int:restaurant_id>")
 def restaurant_details(restaurant_id):
     restaurant = model.session.query(model.Restaurant).get(restaurant_id)
     menu_count = len(restaurant.menus)
-    return render_template("restaurant.html", restaurant=restaurant, count=menu_count)
+    menus = sorted(restaurant.menus)
+    print menus
+    return render_template("restaurant.html", restaurant=restaurant,
+                                              menus=menus, 
+                                              count=menu_count)
 
 
 @app.route("/technique/<int:technique_id>")
@@ -95,19 +99,40 @@ def explore_techniques():
     return render_template("explore_techniques.html")
 
 
-@app.route("/explore_categories")
+@app.route('/explore_categories')
 def explore_categories():
     return render_template("explore_categories.html")
 
 
-@app.route("/explore_decades")
-def explore_decades():
-    return render_template("explore_decades.html")
+@app.route('/decade_results/')
+def decade_results():
+    decade = str(request.args.get('decade'))
+    return redirect('/decade/' + decade)
 
 
-@app.route("/item_results")
+@app.route('/decade/<int:decade>')
+def decade_display(decade):
+    yearlist = controller.counts_for_all_years(decade)
+    print yearlist
+    return render_template('decade.html', decade=decade,
+                                          yearlist=yearlist)
+
+
+@app.route('/year/<int:year>')
+def year_display(year):
+    menu_count = controller.count_menus_by_year(year)
+    item_count = controller.total_dishes_per_year(year)
+    popular = controller.get_popular_dishes_year(year)
+    print popular
+    return render_template('year.html', year=year,
+                                        menu_count=menu_count,
+                                        item_count = item_count,
+                                        popular = popular)
+
+
+@app.route('/item_results')
 def item_results():
-    keyword = request.args.get("search")
+    keyword = request.args.get('search')
     results = controller.find_dishes_by_keyword(keyword)
     if results == False:
         results = ["No results found."]
@@ -120,11 +145,12 @@ def item_results():
 @app.route("/restaurant_results")
 def restaurant_results():
     keyword = request.args.get("search")
-    results = controller.find_dishes_by_keyword(keyword)
+    results = controller.find_restaurant_by_name(keyword)
     if results == False:
         results = ["No results found."]
     count = len(results)
-    return render_template("item_results.html", keyword=keyword, 
+    print results
+    return render_template("restaurant_results.html", keyword=keyword, 
                                                 results=results,
                                                 count=count)
 

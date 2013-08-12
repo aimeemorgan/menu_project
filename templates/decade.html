@@ -1,8 +1,38 @@
 {% extends "layout.html" %}
 {% block head %}
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var yearList = {{ yearlist|safe }};
+        var data = google.visualization.arrayToDataTable(
+          yearList
+          );
+
+       var view = new google.visualization.DataView(data);
+       view.setColumns([0, 2]);
+
+        var options = {
+          title: 'Menu Count by Year',
+          hAxis: {title: 'Year', titleTextStyle: {color: 'red'}}
+        };
+
+        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        chart.draw(view, options);
+
+        var selectHandler = function(e) {
+          window.location = data.getValue(chart.getSelection()[0]['row'], 1 );
+       }
+
+       google.visualization.events.addListener(chart, 'select', selectHandler);
+      }
+      </script>
 {% endblock %}
 {% block content %}
-
+<div id="chart_div" style="width: 1100px; height: 400px;"></div>
+<p>Click on the bar for a year to see that year's details.</p>
+<h2>Most popular items from this decade</h2>
 {% endblock %}
 {% block footer %}
 {% endblock %}

@@ -2,7 +2,7 @@ import model
 import nltk
 import redis
 import re
-import decimal
+import cdecimal
 from nltk.corpus import stopwords
 
 
@@ -23,16 +23,6 @@ def build_dish_corpus():
     return dish_corpus
 
 
-def word_frequencies(corpus):
-# build a dictionary with corpus words mapped to the number
-# of times they appear.
-    frequencies = {}
-    for item, words in corpus.items():
-        for word in words:
-            frequencies.setdefault(word, 0)
-            frequencies[word] += 1
-    return frequencies
-
 ## main all pairs function
 
 def all_pairs(corpus, t):
@@ -42,13 +32,15 @@ def all_pairs(corpus, t):
     count = 0
     for item_id, words in corpus.items():
         matches = find_matches(item_id, index, corpus, t)
+        try:
+            weight = (cdecimal.Decimal(1) / (len(words)))
+        except:
+            weight = 1
         for match in matches:
-            results.setdefault(item_id, [])
-            results[item_id].append(match)
+            results[(match[0], match[1])] = match[2]
         for word in words:
             index.setdefault(word, [])
-            index[word].append((item_id, 
-                        decimal.Decimal(1 / decimal.Decimal(len(words)))))
+            index[word].append((item_id, weight))
         count = count + 1
         print count
     return results
@@ -59,15 +51,16 @@ def find_matches(item_id, index, corpus, t):
     a = {}
     words = corpus[item_id]
     for word in words:
+        weight = (cdecimal.Decimal(1) / (len(words)))
         if word in index.keys():  # if word has been seen before
             appearances = index[word] 
             for item in appearances:  # each item = (item_id, float)
                 if item[0] != item_id:  # don't cmp items to themselves
                     a.setdefault(item[0], 0)
-                    a[item[0]] += (item[1] * (1 / decimal.Decimal(len(words))))
+                    a[item[0]] += (item[1] * weight)
     for item_id, score in a.items():
         if score >= t:
-            matches.append((item_id, score))
+            matches.append((item_id, item[0], score))
     return matches
 
 
@@ -77,14 +70,27 @@ def test_matches(item_id, matches):
             for item in match:
                 if item != item_id:
                     item = model.session.query(model.Item).get(item)
-                    print item.description
+                    print item
+
+
+def match_dictionary_for_db(results):
+    print len(results)
+    matches = {}
+    for pair, score in results.items():
+        print pair
+        matches.setdefault(pair[0], [])
+        matches.setdefault(pair[1], [])
+        matches[pair[0]].append(pair[1])
+        matches[pair[1]].append(pair[0])
+    return matches
+
 
 
 def persist_matches(results):
     r = redis.StrictRedis(host='localhost', port=6379, db=0)
     for item_id, matches in results.items():
         for match in matches:
-            key = ('similarities:%s') % item_id
+            key = ('similarities_item:' + str(item_id))
             r.lpush(key, match)
     r.save
 
@@ -103,7 +109,7 @@ def build_menu_corpus():
                 stoplist = stopwords.words('english')
                 for token in new_tokens:
                     if token in stoplist:
-                        tokens.remove(token)
+                        new_tokens.remove(token)
                 tokens.append(new_tokens)
         menu_corpus[menu.id] = tokens
     return menu_corpus
@@ -116,7 +122,7 @@ def persist_menu_matches(results):
     r = redis.StrictRedis(host='localhost', port=6379, db=0)
     for item_id, matches in results.items():
         for match in matches:
-            key = ('menu_similarities:%s') % item_id
+            key = ('similarities_menu:' + str(item_id))
             r.lpush(key, match)
     r.save
 

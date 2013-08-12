@@ -10,34 +10,63 @@
           decadeList
           );
 
+       var view = new google.visualization.DataView(data);
+       view.setColumns([0, 2]);
+
         var options = {
           title: 'Menu Count by Decade',
           hAxis: {title: 'Decade', titleTextStyle: {color: 'red'}}
         };
 
         var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-        chart.draw(data, options);
+        chart.draw(view, options);
+
+        var selectHandler = function(e) {
+          window.location = data.getValue(chart.getSelection()[0]['row'], 1 );
+       }
+
+       google.visualization.events.addListener(chart, 'select', selectHandler);
       }
       </script>
 {% endblock %}
 
 {% block content %}
-    <h1>Hello, world!</h1>
-    <p>Explore the New York Public Library's "What's on the Menu" dataset</p>
+    <h1>Menu Scout</h1>
+    <p>Explore culinary history via the New York Public Library's "What's on the Menu" dataset</p>
     <h2>Current Stats</h2>
     <ul>
       <li>Total menu items: {{ item_total }}</li>
       <li>Total menus: {{ menu_total }}</li>
       <li>Total unique restaurants: {{ restaurant_total }}</li>
     </ul> 
-       <div id="chart_div" style="width: 1100px; height: 500px;"></div>
+       <div id="chart_div" style="width: 1100px; height: 400px;"></div>
     <h2>Ways to Explore</h2>
     <ul>
     <li>Search by keyword in descriptions of menu items: <form action="/item_results">
       <input type="text" name="search" /><input type="submit">
-    </form></li>
-    <li>Search by keyword in restaurant names: <form action="/restaurant_results"><input type="text" name="search" /><input type="submit"></form></li>
-    <li><a href="./explore_decades">Browse menus by decade</a></li>
+    </form></li><br/>
+    <li>Search by keyword in restaurant names: <form action="/restaurant_results"><input type="text" name="search" /><input type="submit"></form></li><br/>
+    <li>Explore menus by decade: <form name="decades" action="/decade_results">
+        <select name="decade">
+          <option value="1850">1850s</option>
+          <option value="1860">1860s</option>
+          <option value="1870">1870s</option>
+          <option value="1880">1880s</option>
+          <option value="1890">1890s</option>
+          <option value="1900">1900s</option>
+          <option value="1910">1910s</option>
+          <option value="1920">1920s</option>
+          <option value="1930">1930s</option>
+          <option value="1940">1940s</option>
+          <option value="1950">1950s</option>
+          <option value="1960">1960s</option>
+          <option value="1970">1970s</option>
+          <option value="1980">1980s</option>
+          <option value="1990">1990s</option>
+          <option value="2000">2000s</option>
+        </select>
+        <input type="submit">
+      </form></li><br/>
     <li><a href="./explore_techniques">Browse menu items by cooking techniques</a></li>
     <li><a href="./explore_categories">Browse menu items by category</a></li>
   </ul>

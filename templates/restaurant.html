@@ -8,7 +8,7 @@
     <p>Latest menu date:</p>
     <h2>Menus from this restaurant ({{ count }} total):</h2>
     <ul>
-    {% for menu in restaurant.menus %}
+    {% for menu in menus %}
         <li><a href="../menu/{{ menu.id }}">{{ menu.date.year }}/{{ menu.date.month }}/{{ menu.date.day }}</a></li>
     {% endfor %}
     </ul>

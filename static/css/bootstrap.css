@@ -5132,4 +5132,10 @@ td.visible-print {
 
 #content {
   margin: 20px;
+
+}
+
+#chart-div {
+  font-size: 8px;
+  text-aligm: left;
 }

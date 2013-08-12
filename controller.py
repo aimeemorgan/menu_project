@@ -32,14 +32,25 @@ def count_menus_by_years(year):
     return counts
 
 
-def counts_for_all_decades():
-# for map dislay: return list of lists of (decade, count)
-    decade = 'Decade'
-    menu_count = 'Menu Count'
-    decade_list = [[decade, menu_count]] 
-    for year in range(1850, 2010, 10):
+def counts_for_all_years(startyear):
+# for chart dislay: return list of lists of (year, count) for decade
+# indicated by stopyear.
+    endyear = startyear + 10
+    yearlist = [['Year', 'link', 'Menu Count']] 
+    for year in range(startyear, endyear):
         count = count_menus_by_decade(year)
-        decade_list.append([str(year), count])
+        link = '../year/%s' % str(year)
+        yearlist.append([str(year), link, count])
+    return yearlist
+
+
+def counts_for_all_decades():
+# for chart dislay: return list of lists of (decade, count)
+    decade_list = [['Decade', 'link', 'Menu Count']] 
+    for year in range(1850, 2010, 10):
+        link = '../decade/%s' % str(year)
+        count = count_menus_by_decade(year)
+        decade_list.append([str(year), link, count])
     return decade_list
 
 
@@ -77,11 +88,13 @@ def get_random_menu():
 def get_similar_menus(menu_id):
 # return list of dishes that are most similar to <dish>
     r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    results = r.lrange('menu_similarities:%s') % menu_id
+    key  = ('menu_similarities:' + str(menu_id))
+    results = r.lrange(key, 0, -1)
     results_by_score = [(s[1], s[0]) for s in results]
     sorted_by_score = sorted(results_by_score)
     results = [s[1] for s in sorted_by_score]
     return results
+
 
 # functions to get restaurants / restautant info
 
@@ -123,8 +136,16 @@ def find_dishes_by_technique(technique):
 
 
 def find_dishes_by_category(category):
-    dishes = model.session.query(model.Item).filter(model.Item.category.like
-                ('%' + category + '%')).all()
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    key = ('category_items:category')
+    dishes = r.lrange(key, 0, -1)
+    return dishes
+
+
+def find_categories_for_dish(dish):
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    key = ('item_categories:' + int(dish.id))
+    dishes = r.lrange(key, 0, -1)
     return dishes
 
 
@@ -174,34 +195,60 @@ def total_dishes_per_decade(year):
     return total
 
 
-def dish_frequency_by_decade(dish, year):
-    dish_total = float(count_dish_by_decade(dish, year))
-    decade_total = float(total_dishes_per_decade(year))
-    return dish_total / decade_total
+def get_popular_dishes_year(year):   
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    results = r.lrange(('popular_year:' + str(year)), 0, -1)
+    popular_items = []
+    for result in results:
+        result = int(result)
+        item = model.session.query(model.Item).get(result)
+        popular_items.append(item)
+    return popular_items
 
 
-def dish_frequency_decade_for_corpus(year, corpus):
-    dish_frequencies = {}
-    for dish in corpus:
-        dish_frequencies[dish] = dish_frequency_by_decade(dish, year)
-    return dish_frequencies
+def get_popular_dishes_decade(decade):   
+    r = redis.StrictRedis(host='localhost', port=6379, db=0)
+    results = r.lrange(('popular_decade:' +str(decade)), 0, -1)
+    popular_items = []
+    for result in results:
+        result = int(result)
+        item = model.session.query(model.Item).get(result)
+        popular_items.append(item)
+    return results
 
 
-def dish_frequency_decade_sorted(dish_frequencies):
-    freq = []
-    for dish, frequency in dish_frequencies.items():
-        freq.append((frequency, dish))
-    return sorted(freq)
+# move these to data_processing, persist in redis, write
+# new controller functions to retrieve
+# def dish_frequency_by_decade(dish, year):
+#     dish_total = float(count_dish_by_decade(dish, year))
+#     decade_total = float(total_dishes_per_decade(year))
+#     return dish_total / decade_total
+
+
+# def dish_frequency_decade_for_corpus(year, corpus):
+#     dish_frequencies = {}
+#     for dish in corpus:
+#         dish_frequencies[dish] = dish_frequency_by_decade(dish, year)
+#     return dish_frequencies
+
+
+# def dish_frequency_decade_sorted(dish_frequencies):
+#     freq = []
+#     for dish, frequency in dish_frequencies.items():
+#         freq.append((frequency, dish))
+#     return sorted(freq)
 
 
 def get_similar_dishes(dish_id):
 # return list of dishes that are most similar to <dish>
     r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    results = r.lrange('similarities:%s') % dish_id
-    results_by_score = [(s[1], s[0]) for s in results]
-    sorted_by_score = sorted(results_by_score)
-    results = [s[1] for s in sorted_by_score]
-    return results
+    matches = r.lrange(('similarities:' + str(dish_id)), 0, -1)
+    similar_dishes = []
+    for item_id in matches:
+        item_id = int(item_id)
+        item = model.session.query(model.Item).get(item_id)
+        similar_dishes.append(item)
+    return similar_dishes
 
 
 def get_total_dishes():
