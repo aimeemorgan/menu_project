@@ -18,7 +18,6 @@ def shutdown_session(exception=None):
 def index():
     # generate counts for main map of menus by decade
     decade_list = controller.counts_for_all_decades()
-    print decade_list
     random_item = controller.get_random_dish()
     random_menu = controller.get_random_menu()
     random_restaurant = controller.get_random_restaurant()
@@ -149,7 +148,8 @@ def year_display(year):
 @app.route('/item_results')
 def item_results():
     keyword = request.args.get('search')
-    results = controller.find_dishes_by_keyword(keyword)
+    keyword_cap = keyword.capitalize()
+    results = controller.find_dishes_by_keyword(keyword_cap)
     if results == False:
         results = ["No results found."]
     count = len(results)

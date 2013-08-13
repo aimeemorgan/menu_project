@@ -29,53 +29,20 @@
       }
       </script>
 {% endblock %}
-
 {% block content %}
-    <h1>Menu Scout</h1>
     <p>Explore culinary history via the New York Public Library's "What's on the Menu" dataset</p>
-    <h2>Current Stats</h2>
+    <div class="panel">
+    <h2 class="panel-title">Current Stats</h2>
     <ul>
       <li>Total menu items: {{ item_total }}</li>
       <li>Total menus: {{ menu_total }}</li>
       <li>Total unique restaurants: {{ restaurant_total }}</li>
     </ul> 
-       <div id="chart_div" style="width: 1100px; height: 400px;"></div>
-    <h2>Ways to Explore</h2>
-    <ul>
-    <li>Search by keyword in descriptions of menu items: <form action="/item_results">
-      <input type="text" name="search" /><input type="submit">
-    </form></li><br/>
-    <li>Search by keyword in restaurant names: <form action="/restaurant_results"><input type="text" name="search" /><input type="submit"></form></li><br/>
-    <li>Explore menus by decade: <form name="decades" action="/decade_results">
-        <select name="decade">
-          <option value="1850">1850s</option>
-          <option value="1860">1860s</option>
-          <option value="1870">1870s</option>
-          <option value="1880">1880s</option>
-          <option value="1890">1890s</option>
-          <option value="1900">1900s</option>
-          <option value="1910">1910s</option>
-          <option value="1920">1920s</option>
-          <option value="1930">1930s</option>
-          <option value="1940">1940s</option>
-          <option value="1950">1950s</option>
-          <option value="1960">1960s</option>
-          <option value="1970">1970s</option>
-          <option value="1980">1980s</option>
-          <option value="1990">1990s</option>
-          <option value="2000">2000s</option>
-        </select>
-        <input type="submit">
-      </form></li><br/>
-    <li><a href="./explore_techniques">Browse menu items by cooking techniques</a></li>
-    <li><a href="./explore_categories">Browse menu items by category</a></li>
-  </ul>
-  <br/>
-    <h3>Random menu item from the collection</h3>
-    <p><a href="./item/{{ random_item.id }}">{{ random_item.description }}</a></p>
-    <h3>Random menu from the collection</h3>
-    <p><a href="./menu/{{ random_menu.id }}">{{ random_menu.restaurant.name }}, {{ random_menu.date.year }}/{{ random_menu.date.month }}/{{ random_menu.date.day }}</a></p>
-    <h3>Random restaurant from the collection</h3>
-    <p><a href="./restaurant/{{ random_restaurant.id }}">{{ random_restaurant.name }}</a></p>
+    </div>
+    <div id="chart_div" style="width: 1100px; height: 400px;"></div>
+    <h2>Search the collection</h2>
+    <p>Search by keyword in descriptions of menu items:<br/><form action="/item_results">
+      <input type="text" name="search"><input type="submit"></form></p>
+    <p>Search by keyword in restaurant names:<br/> <form action="/restaurant_results"><input type="text" name="search" /><input type="submit"></form></p>
   {% endblock %}
 

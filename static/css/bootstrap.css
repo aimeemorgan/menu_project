@@ -469,17 +469,17 @@ h6 {
 
 h1,
 .h1 {
-  font-size: 41px;
+  font-size: 36px;
 }
 
 h2,
 .h2 {
-  font-size: 34px;
+  font-size: 28px;
 }
 
 h3,
 .h3 {
-  font-size: 26px;
+  font-size: 20px;
 }
 
 h4,
@@ -2304,6 +2304,7 @@ input[type="button"].btn-block {
   padding-left: 0;
   margin-bottom: 20px;
   background-color: #ffffff;
+  max-width: 50%;
 }
 
 .list-group-item {
@@ -2370,17 +2371,21 @@ a.list-group-item.active .list-group-item-text {
 }
 
 .panel {
-  padding: 15px;
-  margin-bottom: 20px;
+  max-width: 25%;
+  padding: 10px;
+  padding-top: 10px;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
+  margin-top: 20px;
   background-color: #ffffff;
-  border: 1px solid #dddddd;
+  border: 2px solid #dddddd;
   border-radius: 4px;
   -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
           box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
 }
 
 .panel-heading {
-  padding: 10px 15px;
+  padding: 5px 5px;
   margin: -15px -15px 15px;
   background-color: #f5f5f5;
   border-bottom: 1px solid #dddddd;
@@ -2390,8 +2395,8 @@ a.list-group-item.active .list-group-item-text {
 
 .panel-title {
   margin-top: 0;
-  margin-bottom: 0;
-  font-size: 18.75px;
+  margin-bottom: 5;
+  font-size: 24px;
   font-weight: 500;
 }
 
@@ -2827,7 +2832,7 @@ button.close {
 
 .navbar {
   position: relative;
-  min-height: 60px;
+  min-height: 68px;
   padding-right: 15px;
   padding-left: 15px;
   margin-bottom: 20px;
@@ -2886,7 +2891,8 @@ button.close {
 }
 
 .navbar-nav {
-  margin-top: 10px;
+  vertical-align: middle;
+  margin-top: 20px;
   margin-bottom: 15px;
 }
 
@@ -2908,7 +2914,7 @@ button.close {
 .navbar-nav > .active > a:hover,
 .navbar-nav > .active > a:focus {
   color: #ffffff;
-  background-color: #1a242f;
+  background-color: transparent;
 }
 
 .navbar-nav > .disabled > a,
@@ -2946,11 +2952,11 @@ button.close {
 
 .navbar-brand {
   display: block;
-  max-width: 200px;
+  max-width: 500px;
   padding: 19.5px 15px;
   margin-right: auto;
   margin-left: auto;
-  font-size: 19px;
+  font-size: 36px;
   font-weight: 500;
   line-height: 21px;
   color: #ffffff;
@@ -5144,3 +5150,8 @@ td.visible-print {
   padding: 10px;
   border: 5px;
 }
+
+body {
+  padding-top: 80px;
+}
+

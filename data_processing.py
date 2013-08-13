@@ -34,8 +34,8 @@ def build_dish_corpus():
 def build_menu_corpus(): 
     menu_list = model.session.query(model.Menu).all()
     menu_corpus = {}
+    count = 0
     for menu in menu_list:
-        print menu.id
         items = menu.get_items()
         tokens = []
         for item in items:
@@ -47,7 +47,8 @@ def build_menu_corpus():
                 for token in new_tokens:
                     if token not in stoplist:
                         tokens.append(token)
-        print tokens
+        count += 1
+        print count
         menu_corpus[menu.id] = tokens
     return menu_corpus
 
@@ -119,7 +120,8 @@ def id_techniques(dish_id, corpus):
     dish_words = corpus[dish_id]
     techniques = []
     false_matches = {'n': 0, 'bed': 0, 'red': 0, 'served': 0, 'assorted': 0, 
-                    'selected': 0, 'imported': 0, 'w': 0, 'o': 0,'k': 0,'u': 0,}
+                    'selected': 0, 'imported': 0, 'w': 0, 'o': 0,'k': 0,
+                    'u': 0,}
     for word in dish_words:
         if len(word) > 2:
             suffix = (word[-2:]).encode('utf-8')
@@ -229,26 +231,3 @@ def persist_most_popular_decades(decade, most_popular):
     model.r.save
 
 
-
-# helper functions
-
-
-def match_dictionary_for_database(results):
-    print len(results)
-    matches = {}
-    for pair, score in results.items():
-        print pair
-        matches.setdefault(pair[0], [])
-        matches.setdefault(pair[1], [])
-        matches[pair[0]].append(pair[1])
-        matches[pair[1]].append(pair[0])
-    return matches
-
-
-
-def persist_matches_dishes(results):
-    for item_id, matches in results.items():
-        for match in matches:
-            key = ('similarities_item:' + str(item_id))
-            model.r.lpush(key, match)
-    model.r.save
