@@ -1,6 +1,5 @@
 import model
 import nltk
-import redis
 import re
 from controller import find_menus_by_year, find_menus_by_decade
 from nltk.corpus import stopwords
@@ -10,10 +9,9 @@ from nltk.corpus import stopwords
 
 def build_itemid_index():
     item_list = model.session.query(model.Item).all()
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
     for item in item_list:
-        r.lpush('itemid_index', item.id)
-    r.save
+        model.r.lpush('itemid_index', item.id)
+    model.r.save
 
 
 def build_dish_corpus():
@@ -22,7 +20,7 @@ def build_dish_corpus():
     dish_list = model.session.query(model.Item).all()
     dish_corpus = {}
     for dish in dish_list:
-        text = (dish.description).lower().strip().strip('*')
+        text = (dish.description).lower().strip()
         stripped_text = re.sub('[^A-Za-z0-9]+', ' ', text)
         tokens = nltk.word_tokenize(stripped_text)
         stoplist = stopwords.words('english')
@@ -37,50 +35,39 @@ def build_menu_corpus():
     menu_list = model.session.query(model.Menu).all()
     menu_corpus = {}
     for menu in menu_list:
+        print menu.id
+        items = menu.get_items()
         tokens = []
-        for item in menu.items:
-            if item.item:
-                text = (item.item.description).lower().strip()
+        for item in items:
+            if item != None:
+                text = (item.description).lower().strip()
                 stripped_text = re.sub('[^A-Za-z0-9]+', ' ', text)
                 new_tokens = nltk.word_tokenize(stripped_text)
                 stoplist = stopwords.words('english')
                 for token in new_tokens:
-                    if token in stoplist:
-                        tokens.remove(token)
-                tokens.append(new_tokens)
+                    if token not in stoplist:
+                        tokens.append(token)
+        print tokens
         menu_corpus[menu.id] = tokens
     return menu_corpus
 
 
 def persist_corpus(name, corpus):
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
     for item_id, tokens in corpus.items():
         for token in tokens:
-            key = (name +':%s') % item_id
-            r.lpush(key, token)
-    r.save
+            key = (name + ':%s') % str(item_id)
+            model.r.lpush(key, token)
+    model.r.save
 
 
 def load_corpus(item_index_name, corpus_prefix):
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    index = r.lrange(item_index_name, 0, -1)
+    index = model.r.lrange(item_index_name, 0, -1)
     corpus = {}
     for item in index:
         key =  corpus_prefix + ':%s' % item
-        values = r.lrange(key, 0, -1)
+        values = model.r.lrange(key, 0, -1)
         corpus[int(item)] = values
     return corpus
-
-
-def strip_prepositional_phrases(corpus):
-# strip out prepositional phrases as pre-classification step
-# (i.e. "with...", "in..." "accompanied by...")
-    for id, tokens in corpus.items():
-        for i in range(len(tokens)):
-            if tokens[i] in ['of', 'from', 'in', 'with', 'accompanied']:
-                tokens = tokens[0:(i-1)]
-    return corpus
-# not working -- why? index error
 
 
 # classification
@@ -97,27 +84,24 @@ def word_frequencies(corpus):
 
 
 def build_word_index(freq):
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
     for word in freq.keys():
-        r.lpush('word_index', word)
-    r.save
+        model.r.lpush('word_index', word)
+    model.r.save
 
 
-def persist_word_frequencies(frequencies):
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)    
+def persist_word_frequencies(frequencies): 
     for word, freq in frequencies.items():
             key = ('frequency:%s') % word
-            r.lpush(key, freq)
-    r.save
+            model.r.lpush(key, freq)
+    model.r.save
 
 
 def load_word_frequencies():
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)  
-    index = r.lrange('word_index', 0, -1)
+    index = model.r.lrange('word_index', 0, -1)
     freq = {}
     for word in index:
         key =  'frequency:%s' % word
-        value = r.lrange(key, 0, -1)
+        value = model.r.lrange(key, 0, -1)
         freq[word] = value
     return freq
 
@@ -134,69 +118,33 @@ def id_techniques(dish_id, corpus):
 # by preparation methods.
     dish_words = corpus[dish_id]
     techniques = []
+    false_matches = {'n': 0, 'bed': 0, 'red': 0, 'served': 0, 'assorted': 0, 
+                    'selected': 0, 'imported': 0, 'w': 0, 'o': 0,'k': 0,'u': 0,}
     for word in dish_words:
         if len(word) > 2:
             suffix = (word[-2:]).encode('utf-8')
             if suffix == 'ed':
-                techniques.append(word)
+                if word not in false_matches:
+                    techniques.append(word)
     if len(techniques) > 0:
         return techniques
     else:
-        return "unknown"
+        return ['unknown']
 
 
 def techniques_for_corpus(corpus):
-    dishes_to_techniques = {}
     for dish_id, text in corpus.items():
         techniques = id_techniques(dish_id, corpus)
         if techniques:
-            dishes_to_techniques[dish_id] = techniques
-    return dishes_to_techniques
-
-
-def map_techniques_to_dishes(dishes_to_techniques):
-    techniques_to_dishes = {}
-    false_matches = {'bed': 0, 'red': 0, 'served': 0, 'assorted': 0}
-    for dish_id, techniques in dishes_to_techniques.items():
-        for c in techniques:
-            if c not in false_matches:
-                if len(c) > 1:
-                    techniques_to_dishes.setdefault(c, [])
-                    techniques_to_dishes[c].append(dish_id)
-    return techniques_to_dishes
-
-
-def persist_techniques(techniques_to_dishes):
-# write technique info to Techniques table.
-    technique_id = 1
-    itemtechnique_id = 1
-    for technique, dishes in techniques_to_dishes.items():
-        new_technique = model.Technique(name=technique, id=technique_id)
-        model.session.add(new_technique)
-        for dish in dishes:
-            new_itemtechnique = model.ItemTechnique(item_id=dish, 
-                                                    technique_id=technique_id)
-            model.session.add(new_itemtechnique)
-            model.session.commit()
-            itemtechnique_id += 1
-        technique_id += 1
-
-
-def find_technique_frequencies(techniques_to_dishes):
-    technique_freq = {}
-    for technique, dishes in techniques_to_dishes.items():
-        technique_freq[technique] = len(dishes)
-    return technique_freq
-
-
-def sort_technique_frequencies(technique_freq):
-    sorted_technique_freq = []
-    for technique, frequency in technique_freq.items():
-        sorted_technique_freq.append((frequency, technique))
-        sorted_technique_freq = sorted(sorted_technique_freq)
-    return sorted_technique_freq
-
-
+            for technique in techniques:
+                # add technique tags to dish, persist to redis
+                dish_key = ('item_techniques:' + str(dish_id))
+                model.r.lpush(dish_key, technique)
+                # add dish_id to technique list, persist to redis
+                technique_key = ('technique_items:' + str(technique))
+                model.r.lpush(technique_key, dish_id)
+                model.r.save
+    
 
 
 def most_popular_dishes(year):
@@ -266,29 +214,41 @@ def most_popular_all_decades():
 
 
 def persist_most_popular_years(year, most_popular):
-    r = redis.StrictRedis(host='holocalhost', port=6379, db=0)
     items = most_popular[year] 
     for item in items:
         key = ('popular_year:%s') % year
-        r.lpush(key, item)
-    r.save
+        model.r.lpush(key, item)
+    model.r.save
 
 
 def persist_most_popular_decades(decade, most_popular):
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
     items = most_popular[decade] 
     for item in items:
         key = ('popular_decade:%s') % decade
-        r.lpush(key, item)
-    r.save
+        model.r.lpush(key, item)
+    model.r.save
 
 
 
 # helper functions
 
-def find_unclassified(category):
-# find dishes that lack a classification term for a given
-# category (to aid in refinement of classification)
-    pass
+
+def match_dictionary_for_database(results):
+    print len(results)
+    matches = {}
+    for pair, score in results.items():
+        print pair
+        matches.setdefault(pair[0], [])
+        matches.setdefault(pair[1], [])
+        matches[pair[0]].append(pair[1])
+        matches[pair[1]].append(pair[0])
+    return matches
 
 
+
+def persist_matches_dishes(results):
+    for item_id, matches in results.items():
+        for match in matches:
+            key = ('similarities_item:' + str(item_id))
+            model.r.lpush(key, match)
+    model.r.save

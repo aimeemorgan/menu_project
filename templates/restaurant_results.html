@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block head %}
+<title>Menu Scout: restaurant search </title>
 {% endblock %}
 {% block content %}
 <h1>Results for your search "{{ keyword }}" ({{ count }} total):</h1>
@@ -9,6 +10,4 @@
     <li><a href="../restaurant/{{ restaurant.id }}">{{ restaurant.name }}</a></li>
 {% endfor %}
 </ul>
-{% endblock %}
-{% block footer %}
 {% endblock %}

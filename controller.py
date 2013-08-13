@@ -1,5 +1,4 @@
 import model
-import redis
 from datetime import datetime
 from random import randint
 
@@ -87,9 +86,8 @@ def get_random_menu():
 
 def get_similar_menus(menu_id):
 # return list of dishes that are most similar to <dish>
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
     key  = ('menu_similarities:' + str(menu_id))
-    results = r.lrange(key, 0, -1)
+    results = model.r.lrange(key, 0, -1)
     results_by_score = [(s[1], s[0]) for s in results]
     sorted_by_score = sorted(results_by_score)
     results = [s[1] for s in sorted_by_score]
@@ -136,16 +134,14 @@ def find_dishes_by_technique(technique):
 
 
 def find_dishes_by_category(category):
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    key = ('category_items:category')
-    dishes = r.lrange(key, 0, -1)
+    key = ('category_items:' + category)
+    dishes = model.r.lrange(key, 0, -1)
     return dishes
 
 
 def find_categories_for_dish(dish):
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
     key = ('item_categories:' + int(dish.id))
-    dishes = r.lrange(key, 0, -1)
+    dishes = model.r.lrange(key, 0, -1)
     return dishes
 
 
@@ -196,8 +192,7 @@ def total_dishes_per_decade(year):
 
 
 def get_popular_dishes_year(year):   
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    results = r.lrange(('popular_year:' + str(year)), 0, -1)
+    results = model.r.lrange(('popular_year:' + str(year)), 0, -1)
     popular_items = []
     for result in results:
         result = int(result)
@@ -207,8 +202,7 @@ def get_popular_dishes_year(year):
 
 
 def get_popular_dishes_decade(decade):   
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    results = r.lrange(('popular_decade:' +str(decade)), 0, -1)
+    results = model.r.lrange(('popular_decade:' +str(decade)), 0, -1)
     popular_items = []
     for result in results:
         result = int(result)
@@ -241,8 +235,7 @@ def get_popular_dishes_decade(decade):
 
 def get_similar_dishes(dish_id):
 # return list of dishes that are most similar to <dish>
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
-    matches = r.lrange(('similarities:' + str(dish_id)), 0, -1)
+    matches = model.r.lrange(('similarities_item:' + str(dish_id)), 0, -1)
     similar_dishes = []
     for item_id in matches:
         item_id = int(item_id)

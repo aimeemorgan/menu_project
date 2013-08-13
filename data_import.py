@@ -4,7 +4,7 @@ import datetime
 
 
 def load_menus_and_restaurants(session):
-    with open('./ref_docs/Menu.csv') as csvfile:
+    with open('./ref_files/Menu.csv') as csvfile:
         menureader = csv.reader(csvfile, delimiter=",")
         rest_id = 1
         for row in menureader:  
@@ -15,9 +15,9 @@ def load_menus_and_restaurants(session):
             session.commit()
             if row[12] != '':  # format date
                 date_args = row[12].split('-')
-                date = datetime.date(int(date_args[0]),
-                                     int(date_args[1]),
-                                     int(date_args[2]))
+                date = datetime.date((int(date_args[0])),
+                                     (int(date_args[1])),
+                                     (int(date_args[2])))
             else:
                 date = None
             new_menu = model.Menu(id=int(row[0]),
@@ -32,7 +32,7 @@ def load_menus_and_restaurants(session):
 
 
 def load_items(session):
-    with open('./ref_docs/Dish.csv') as csvfile:
+    with open('./ref_files/Dish.csv') as csvfile:
         itemreader = csv.reader(csvfile, delimiter=",")
         for row in itemreader:
             first_year = None  # format dates
@@ -47,7 +47,7 @@ def load_items(session):
                 low_price=float(row[7])
             if row[8] != '':
                 high_price=float(row[8])
-
+            print row[1]
             new_item = model.Item(id=int(row[0]),
                                   description=row[1].strip("\"").title(),
                                   first_year=first_year,
@@ -71,8 +71,8 @@ def load_items(session):
 #         for row in itemreader:
 #             if row[2]:
 #                 price = float(row[2]
-)#             else
-:#                 price = None
+#             else
+#                 price = None
 #             menu_id = menu_ids[row[1]]
 #             new_menuitem = model.MenuItem(id=int(row[0]),
 #                                         items_id=int(row[4]),
@@ -87,12 +87,12 @@ def load_items(session):
 
 # COPY menuitems from '/home/alm/src/hackbright_project/ref_docs/menuitems.csv' DELIMITERS ',' CSV;
 
-def main(session):
-    load_menus_and_restaurants(session)
-    load_items(session)
-    #load_menuitems(session)
+# def main(session):
+#     load_menus_and_restaurants(session)
+#     load_items(session)
+#     #load_menuitems(session)
 
 
-if __name__ == "__main__":
-    s = model.session
-    main(s)
+# if __name__ == "__main__":
+#     s = model.session
+#     main(s)

@@ -1,13 +1,17 @@
+import redis
+
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Float, create_engine, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref, scoped_session
 
-engine = create_engine('postgresql+psycopg2://alm:password@localhost/menus')
+engine = create_engine('postgresql+psycopg2://alm:password@localhost/menus2')
 # for heroku deploy, will need to modify this to point to DATABASE_URL.
 
 session = scoped_session(sessionmaker(bind=engine,
                                       autocommit=False,
                                       autoflush = False))
+
+r = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 Base = declarative_base()
 Base.query = session.query_property()
@@ -23,7 +27,6 @@ class Restaurant(Base):
     location = Column(String(256))
 
     menus = relationship("Menu", backref=backref("restaurant"))
-    #similar_restaurants = relationship("RestaurantSimilarity", backref=backref("restaurants"))
 
     def __repr__(self):
         name = self.name.encode('utf-8')
@@ -77,13 +80,9 @@ class Item(Base):
     latest_year = Column(DateTime, nullable=True)
     low_price = Column(Float, nullable=True)
     high_price = Column(Float, nullable=True)
-    # category = Column(Integer, ForeignKey('categories.id'), nullable=True)
+    category = Column(String, nullable=True)
 
     menus = relationship("MenuItem", backref=backref("items"))
-    techniques = relationship("ItemTechnique", backref=backref("items"))
-    ingredients = relationship("ItemIngredient", backref=backref("items"))
-
-
 
     def __repr__(self):
         description = self.description.encode('utf-8')
@@ -114,45 +113,6 @@ class Item(Base):
         return ingredients
 
 
-class Technique(Base):
-    __tablename__ = "techniques"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-
-    items = relationship("ItemTechnique", backref=backref("techniques"))
-
-
-# class Category(Base):
-#     __tablename__ = "categories"
-
-#     id = Column(Integer, primary_key=True)
-#     name = Column(String, nullable=False)
-
-#     items = relationship("Item", backref=backref("categories"))
-
-
-class Ingredient(Base):
-    __tablename__ = "ingredients"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-
-    items = relationship("ItemIngredient", backref=backref("ingredients"))
-
-
-class ItemIngredient(Base):
-    __tablename__ = "itemingredients"
-
-    id = Column(Integer, primary_key=True)
-    ingredient_id = Column(Integer, ForeignKey('ingredients.id'), nullable=False)
-    item_id = Column(Integer, ForeignKey('items.id'), nullable=False)
-    price = Column(Float, nullable=True)
-
-    item = relationship("Item", backref=backref("itemingredient"))
-    ingredient = relationship("Ingredient", backref=backref("itemingredient"))
-
-
 class MenuItem(Base):
     __tablename__ = "menuitems"
 
@@ -163,18 +123,7 @@ class MenuItem(Base):
 
     item = relationship("Item", backref=backref("menuitem"))
     menu = relationship("Menu", backref=backref("menuitem"))
-
-
-class ItemTechnique(Base):
-    __tablename__ = "itemtechniques"
-
-    id = Column(Integer, primary_key=True)
-    item_id = Column(Integer, ForeignKey('items.id'), nullable=False)
-    technique_id = Column(Integer, ForeignKey('techniques.id'), nullable=False)
-  
-    item = relationship("Item", backref=backref("itemtechniques"))
-    technique = relationship("Technique", backref=backref("itemtechniques"))
-   
+ 
 
 def main():
     pass

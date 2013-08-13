@@ -1,16 +1,3 @@
-Onion
-Garlic
-Spicy
-Sweet
-Scallion
-Chive
-Ginger
-Horseradish
-Wasabi
-chili
-cayenne
-spicy
-[condiments?]
 ketchup
 catsup
 mustard
@@ -23,3 +10,5 @@ capers
 olive
 sauce
 hollandaise
+Horseradish
+Wasabi

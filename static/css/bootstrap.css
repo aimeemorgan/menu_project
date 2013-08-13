@@ -5139,3 +5139,8 @@ td.visible-print {
   font-size: 8px;
   text-aligm: left;
 }
+
+#footer {
+  padding: 10px;
+  border: 5px;
+}

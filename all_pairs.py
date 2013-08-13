@@ -3,24 +3,7 @@ import nltk
 import redis
 import re
 import cdecimal
-from nltk.corpus import stopwords
-
-
-def build_dish_corpus():
-# builds a dictionary where key is item.id, value is item.description
-# as a tokenized list. lowercase/strip punctuation, strip stopwords
-    dish_list = model.session.query(model.Item).all()
-    dish_corpus = {}
-    for dish in dish_list:
-        text = (dish.description).lower().strip().strip('*')
-        stripped_text = re.sub('[^A-Za-z0-9]+', ' ', text)
-        tokens = nltk.word_tokenize(stripped_text)
-        stoplist = stopwords.words('english')
-        for token in tokens:
-            if token in stoplist:
-                tokens.remove(token)
-        dish_corpus[dish.id] = tokens
-    return dish_corpus
+from data_processing import build_dish_corpus, build_menu_corpus
 
 
 ## main all pairs function
@@ -80,51 +63,28 @@ def match_dictionary_for_db(results):
         print pair
         matches.setdefault(pair[0], [])
         matches.setdefault(pair[1], [])
-        matches[pair[0]].append(pair[1])
-        matches[pair[1]].append(pair[0])
+        if pair[1] not in matches[pair[0]]:
+            matches[pair[0]].append(pair[1])
+        if pair[0] not in matches[pair[1]]:
+            matches[pair[1]].append(pair[0])
     return matches
 
 
 
 def persist_matches(results):
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
     for item_id, matches in results.items():
         for match in matches:
             key = ('similarities_item:' + str(item_id))
-            r.lpush(key, match)
-    r.save
+            model.r.lpush(key, match)
+    model.r.save
 
-### compute menu similarities
-
-def build_menu_corpus(): 
-    menu_list = model.session.query(model.Menu).all()
-    menu_corpus = {}
-    for menu in menu_list:
-        tokens = []
-        for item in menu.items:
-            if item.item:
-                text = (item.item.description).lower().strip()
-                stripped_text = re.sub('[^A-Za-z0-9]+', ' ', text)
-                new_tokens = nltk.word_tokenize(stripped_text)
-                stoplist = stopwords.words('english')
-                for token in new_tokens:
-                    if token in stoplist:
-                        new_tokens.remove(token)
-                tokens.append(new_tokens)
-        menu_corpus[menu.id] = tokens
-    return menu_corpus
-
-# word frequency function -- can use above
-# all pairs, find matches -- use above
-# ngrams as future refinement?
 
 def persist_menu_matches(results):
-    r = redis.StrictRedis(host='localhost', port=6379, db=0)
     for item_id, matches in results.items():
         for match in matches:
             key = ('similarities_menu:' + str(item_id))
-            r.lpush(key, match)
-    r.save
+            model.r.lpush(key, match)
+    model.r.save
 
 
 

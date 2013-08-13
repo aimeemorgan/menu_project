@@ -3,9 +3,23 @@ omelette
 omelet
 cereal
 muffin
+muffins
 bagel
+bagels
+scones
 scone
-pancake
+pancakes
 oatmeal
 cornflakes
+donut
+donuts
+doughnut
+doughnuts
+croissant
+croissants
+toast
+danish
+waffle
+waffles
+
 

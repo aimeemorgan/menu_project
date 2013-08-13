@@ -2,7 +2,7 @@
 <html>
     <head>
         {% block head %}
-        <title>{% block title %}{% endblock %}Historic Menus OMG</title>
+        <title>Menu Scout {% block title %}{% endblock %}</title>
         {% endblock %}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <!-- Bootstrap -->
@@ -12,6 +12,10 @@
         <div id="content">{% block content %}{% endblock %}</div>
         <div id="footer">
             {% block footer %}
+            <hr/>
+            <p><a href="../about">More information about Menu Scout</a></p>
+            <p><a href="../">Back to Menu Scout main page</a></p>
+
             {% endblock %}
         </div>
         <!-- JavaScript plugins (requires jQuery) -->

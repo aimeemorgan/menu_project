@@ -2,8 +2,10 @@ milk
 cream
 cheese
 yogurt
-[so many cheeses]
+edam
 brie
 gorgonzola
 cheddar
 chevre
+gouda
+manchego

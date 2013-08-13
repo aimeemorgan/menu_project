@@ -49,10 +49,14 @@ def item_details(item_id):
     menus = sorted(menus, reverse=True)
     menu_count = len(menus)
     similarities = controller.get_similar_dishes(item_id)
+    techniques = model.r.lrange(('item_techniques:' + str(item_id)), 0, -1)
+    categories = model.r.lrange(('item_categories:' + str(item_id)), 0, -1)
     return render_template("item.html", item=item, 
                                         menus=menus,
                                         similarities=similarities,
-                                        count=menu_count
+                                        techniques=techniques,
+                                        count=menu_count,
+                                        categories=categories
                                         )
 
 
@@ -88,10 +92,22 @@ def restaurant_details(restaurant_id):
                                               count=menu_count)
 
 
-@app.route("/technique/<int:technique_id>")
-def technique_details(technique_id):
-    technique = model.session.query(model.Technique).get(technique_id)
-    return render_template("technique.html", technique=technique)
+@app.route("/technique/<technique>")
+def technique_details(technique):
+    items = model.r.lrange(('technique_items:' + technique), 0, -1)
+    dishes = []
+    for item in items:
+        dish = model.session.query(model.Item).get(int(item))
+        dishes.append(dish)
+    return render_template("technique.html", technique=technique,
+                                             dishes=dishes)
+
+
+@app.route("/category/<category>")
+def category_details(category):
+    ##!!!!!!!!!!!!!technique = model.session.query(model.Technique).get(technique_id)
+    ##get list of items with this technique
+    return render_template('category.html', category=category)
 
 
 @app.route("/explore_techniques")

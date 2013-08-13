@@ -70,13 +70,12 @@
     <li><a href="./explore_techniques">Browse menu items by cooking techniques</a></li>
     <li><a href="./explore_categories">Browse menu items by category</a></li>
   </ul>
-
+  <br/>
     <h3>Random menu item from the collection</h3>
     <p><a href="./item/{{ random_item.id }}">{{ random_item.description }}</a></p>
     <h3>Random menu from the collection</h3>
     <p><a href="./menu/{{ random_menu.id }}">{{ random_menu.restaurant.name }}, {{ random_menu.date.year }}/{{ random_menu.date.month }}/{{ random_menu.date.day }}</a></p>
     <h3>Random restaurant from the collection</h3>
     <p><a href="./restaurant/{{ random_restaurant.id }}">{{ random_restaurant.name }}</a></p>
-    <p><a href="./about">More information about the menu project</a></p>
   {% endblock %}
 

@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block head %}
+<title>Menu Scout: menu details</title>
 {% endblock %}
 {% block content %}
     <h1>Menu details for menu #{{ menu.id }}</h1>
@@ -24,6 +25,4 @@
         <li><a href="../item/{{ menu.id }}">{{ s.restaurant.name }}, {{ s.date.year }}</a></li>
     {% endfor %}
     </ul>
-{% endblock %}
-{% block footer %}
 {% endblock %}
