@@ -4,10 +4,10 @@
 {% endblock %}
 {% block content %}
 <h1>Results for your search "{{ keyword }}" ({{ count }} total):</h1>
-<p>(click on a result to see detailed information about it.)</p>
-<ul>
+<p>(click on a result to see more information about the item)</p>
+<ul class="list-group">
 {% for item in results %}
-    <li><a href="../item/{{ item.id }}">{{ item.description }}</a></li>
+    <li class="list-group-item"><a href="../item/{{ item.id }}">{{ item.description }}</a></li>
 {% endfor %}
 </ul>
 {% endblock %}

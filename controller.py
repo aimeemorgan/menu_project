@@ -98,7 +98,8 @@ def get_similar_menus(menu_id):
 
 
 def find_restaurant_by_name(name):
-    restaurant = model.session.query(model.Restaurant).filter(model.Restaurant.name.like('%' + name + '%')).all()
+    restaurant = model.session.query(model.Restaurant).filter(
+                    model.Restaurant.name.like('%' + name + '%')).all()
     return restaurant
 
 
@@ -124,12 +125,14 @@ def get_random_restaurant():
 
 
 def find_dishes_by_keyword(keyword):
-    dishes = model.session.query(model.Item).filter(model.Item.description.like('%' + keyword + '%')).all()
+    dishes = model.session.query(model.Item).filter(
+                model.Item.description.like('%' + keyword + '%')).all()
     return dishes
 
 
 def find_dishes_by_technique(technique):
-    dishes = model.session.query(model.Item).filter(model.Item.technique.like('%' + technique + '%')).all()
+    dishes = model.session.query(model.Item).filter(
+                model.Item.technique.like('%' + technique + '%')).all()
     return dishes
 
 
@@ -151,7 +154,8 @@ def count_dish_by_year(dish, year):
     for i in dish.menus:
         date = i.menu.date
         print date
-        if (date >= datetime(year, 1, 1)) and (date <= datetime(year, 12, 31)):
+        if (date >= datetime(year, 1, 1)) and (
+                date <= datetime(year, 12, 31)):
             count += 1
             print count
     return count

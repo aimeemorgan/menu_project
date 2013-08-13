@@ -1,7 +1,4 @@
 import model
-import nltk
-import redis
-import re
 import cdecimal
 from data_processing import build_dish_corpus, build_menu_corpus
 
@@ -37,7 +34,7 @@ def find_matches(item_id, index, corpus, t):
         weight = (cdecimal.Decimal(1) / (len(words)))
         if word in index.keys():  # if word has been seen before
             appearances = index[word] 
-            for item in appearances:  # each item = (item_id, float)
+            for item in appearances:  # each item = (item_id, decimal)
                 if item[0] != item_id:  # don't cmp items to themselves
                     a.setdefault(item[0], 0)
                     a[item[0]] += (item[1] * weight)
@@ -45,15 +42,6 @@ def find_matches(item_id, index, corpus, t):
         if score >= t:
             matches.append((item_id, item[0], score))
     return matches
-
-
-def test_matches(item_id, matches):
-    for match in matches:
-        if item_id in match:
-            for item in match:
-                if item != item_id:
-                    item = model.session.query(model.Item).get(item)
-                    print item
 
 
 def match_dictionary_for_db(results):
@@ -68,7 +56,6 @@ def match_dictionary_for_db(results):
         if pair[0] not in matches[pair[1]]:
             matches[pair[1]].append(pair[0])
     return matches
-
 
 
 def persist_matches(results):
