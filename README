@@ -1,3 +1,9 @@
-Hackbright final project using the New York Public Library's "What's on the Menu?" dataset (http://menus.nypl.org/).
+Hackbright final project using the New York Public Library's "What's on the Menu?" dataset (http://menus.nypl.org/). 
+More information at http://aimeecodes.blogspot.com/2013/07/project-plan-reveal.html.
 
-Documentation to come; for now, more information at http://aimeecodes.blogspot.com/2013/07/project-plan-reveal.html.
+IMPORT TOOLS
+(for importing data from NYPL's CSV files)
+
+data_import.py: Imports information on menus, items, and restaurants
+
+menuitems_import.py: For creating links between menus and items. 
