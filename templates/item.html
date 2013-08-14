@@ -3,7 +3,7 @@
 <title>Menu Scout: item details</title>
 {% endblock %}
 {% block content %}
-    <h2>Item details for {{ item.description }} (item #{{ item.id }})</h2>
+    <h2>Item details for {{ item.name }} (item #{{ item.id }})</h2>
     <p>Categories:</p>
         <ul> 
             {% for category in categories %}
@@ -17,21 +17,25 @@
         {% endfor %}
 
     </ul>
-<!--     <p>Date of first appearance: {{ item.first_datestring }}</p>
+    <p>Date of first appearance: {{ item.firstdate }}</p>
     <p>Date of latest appearance: {{ item.latest_datestring }} </p>
-    <p>Lowest price: ${{ item.low_price }} </p>
-    <p>Highest price: ${{ item.high_price }}</p> -->
+    <p>Lowest price: ${{ item.prices[0] }} </p>
+    <p>Highest price: ${{ item.prices[-1] }}</p>
     <h3>Menus on which this dish appears ({{ count }} total):</h3>
     <ul>
     {% for menu in menus %}
-        <li><a href="../menu/{{ menu.id }}">{{ menu.restaurant.name }}, {{ menu.datestring }}</a></li>
+        <li><a href="../menu/{{ menu.id }}">{{ menu.restaurant.name }}. {{ menu.datestring }}</a></li>
     {% endfor %}
     </ul>
     <h3>Possible similar items in the collection</h3>
     <p>Matching similar items is an experimental feature, so you might see some odd matches.</p>
-    <ul>
-    {% for s in similarities %}
-        <li><a href="../item/{{ s.id }}">{{ s.description }}</a></li>
-    {% endfor %}
-    </ul>
+        <ul>
+        {% for s in similarities %}
+            {% if s == 'no similar items found' %}
+                <li>{{ s }}</li>
+            {% else %}
+                <li class="list-group-item"><a href="../item/{{ s.id }}">{{ s.name }}</a></li>
+            {% endif %}
+        {% endfor %}
+        </ul>
 {% endblock %}

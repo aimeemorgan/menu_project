@@ -3,11 +3,15 @@
 <title>Menu Scout: restaurant search </title>
 {% endblock %}
 {% block content %}
-<h2>Results for your search "{{ keyword }}" ({{ count }} total):</h2>
+<h2>Results for your search "{{ keyword }}":</h2>
 <p>(click on a result to see detailed information about it.)</p>
 <ul class="list-group">
 {% for restaurant in results %}
+	{% if restaurant == 'no results found' %}
+	    <p>{{ item }}</p>
+	{% else %}
     <li class="list-group-item"><a href="../restaurant/{{ restaurant.id }}">{{ restaurant.name }}</a></li>
+    {% endif %}
 {% endfor %}
 </ul>
 {% endblock %}

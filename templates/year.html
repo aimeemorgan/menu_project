@@ -10,6 +10,12 @@
       <li><a href="../item/{{ item.id }}">{{ item.description }}</a></li>
     {% endfor %}
 <h2>Menus from this year:</h2>
+<p>(Currently limited to 50 results.)</p>
+    <ul>
+    {% for menu in menus %}
+        <li><a href="../menu/{{ menu.id }}">{{ menu.restaurant.name }}, {{ menu.datestring }}</a></li>
+    {% endfor %}
+    </ul>
 {% endblock %}
 {% block footer %}
 {% endblock %}

@@ -53,16 +53,19 @@ def counts_for_all_decades():
     return decade_list
 
 
-def find_menus_by_year(year):
-    print "now entering find menus by year", year
-    menus = model.session.query(model.Menu).filter(
-        model.Menu.date >= datetime(year, 1, 1)).filter(
-        model.Menu.date <= datetime(year, 12, 31)).all()
+def find_menus_by_year(year, limit=False):
+    if (limit is not False) and (type(limit) == int):
+        menus = model.session.query(model.Menu).filter(
+            model.Menu.date >= datetime(year, 1, 1)).filter(
+            model.Menu.date <= datetime(year, 12, 31)).limit(limit)
+    else:
+        menus = model.session.query(model.Menu).filter(
+            model.Menu.date >= datetime(year, 1, 1)).filter(
+            model.Menu.date <= datetime(year, 12, 31)).all()
     return menus
 
 
-def find_menus_by_decade(year):
-    print "now entering find_menus by decade", year
+def find_menus_by_decade(year, limit=False):
     endyear = year + 10
     menu_list = []
     for year in range(year, endyear):
@@ -101,9 +104,11 @@ def get_similar_menus(menu_id):
 
 
 def find_restaurant_by_name(name):
-    restaurant = model.session.query(model.Restaurant).filter(
+    restaurants = model.session.query(model.Restaurant).filter(
                     model.Restaurant.name.like('%' + name + '%')).all()
-    return restaurant
+    if restaurants == []:
+        restaurants = ['no results found']
+    return restaurants
 
 
 def location_same_as_name(restaurant):
@@ -127,15 +132,24 @@ def get_random_restaurant():
 # functions to get dishes / dish info
 
 
-def find_dishes_by_keyword(keyword):
-    dishes = model.session.query(model.Item).filter(
-                model.Item.description.like('%' + keyword + '%')).all()
+def find_dishes_by_keyword(keyword, limit=False):
+    if (limit is not False) and (type(limit) == int):
+        dishes = model.session.query(model.Item).filter(
+            model.Item.description.like('%' + keyword + '%')).limit(limit)
+    else:
+        dishes = model.session.query(model.Item).filter(
+                    model.Item.description.like('%' + keyword + '%')).all()
+    if dishes == []:
+        dishes = ['no results found']
     return dishes
 
 
-def find_dishes_by_technique(technique):
+def find_dishes_by_technique(technique, limit=False):
     key = ('technique_items:') + technique
-    items = model.r.lrange(key, 0, -1)
+    if (limit is not False) and (type(limit) == int):
+        items = model.r.lrange(key, 0, limit-1)
+    else: 
+        items = model.r.lrange(key, 0, -1)
     dishes = []
     for item in items:
         item_id = int(item)
@@ -144,9 +158,37 @@ def find_dishes_by_technique(technique):
     return dishes
 
 
-def find_dishes_by_category(category):
+def find_dishes_select_categories():
+# for use on Explore Categories page
+# for each category in categories, returns a tuple with
+# category name, count of dishes in category, and three dishes
+# in that category.
+    categories =    {'Breakfast': 0,
+                     'Dessert': 0,
+                     'Fruit': 0,
+                     'Fruit': 0,
+                     'Meat': 0,
+                     'Poultry': 0,
+                     'Pasta': 0,
+                     'Seafood': 0,
+                     'Soup': 0,
+                     'Vegetable': 0,
+                    }
+
+    results = []
+    for category in categories.keys():
+        category_lowercase = category.lower()
+        dishes = find_three_dishes_by_category(category_lowercase)
+        print dishes
+        results.append((category, dishes))
+    return results
+
+
+def find_three_dishes_by_category(category):
     key = ('category_items:' + category)
-    items = model.r.lrange(key, 0, -1)
+    length = len(model.r.lrange(key, 0, -1))
+    seed = randint(0, length)
+    items = model.r.lrange(key, seed, seed+2)
     dishes = []
     for item in items:
         item_id = int(item)
@@ -155,8 +197,71 @@ def find_dishes_by_category(category):
     return dishes
 
 
-def find_categories_for_dish(dish):
-    key = ('item_categories:' + int(dish.id))
+def find_dishes_select_techniques():
+# for use on Explore Techniques page
+# for each technique in techniques, returns a tuple with
+# technique name, count of dishes in technique, and three dishes
+# in that technique.
+    techqniues =    {'Braised': 0,
+                     'Boiled': 0,
+                     'Broiled': 0,
+                     'Carmelized': 0,
+                     'Coddled': 0,
+                     'Deviled': 0,
+                     'Fried': 0,
+                     'Mashed': 0,
+                     'Poached': 0,
+                     'Sauteed': 0,
+                     'Steamed': 0,
+                     'Stuffed': 0,
+                     'Toasted': 0,
+                     'Whipped': 0
+                    }
+
+    results = []
+    for technique in techqniues.keys():
+        technique_lowercase = technique.lower()
+        dishes = find_three_dishes_by_technique(technique_lowercase)
+        print dishes
+        results.append((technique, dishes))
+    return results
+
+
+def find_three_dishes_by_technique(technique):
+    key = ('technique_items:' + technique)
+    length = len(model.r.lrange(key, 0, -1))
+    seed = randint(0, length)
+    items = model.r.lrange(key, seed, seed+2)
+    dishes = []
+    for item in items:
+        item_id = int(item)
+        dish = model.session.query(model.Item).get(item_id)
+        dishes.append(dish)
+    return dishes
+
+
+def find_dishes_by_category(category, limit=False):
+    key = ('category_items:') + category
+    if (limit is not False) and (type(limit) == int):
+        items = model.r.lrange(key, 0, limit-1)
+    else: 
+        items = model.r.lrange(key, 0, -1)
+    dishes = []
+    for item in items:
+        item_id = int(item)
+        dish = model.session.query(model.Item).get(item_id)
+        dishes.append(dish)
+    return dishes
+
+
+def get_techniques_for_dish(item_id):
+    key = ('item_techniques:') + str(item_id)
+    techniques = model.r.lrange(key, 0, -1)
+    return techniques
+
+
+def get_categories_for_dish(item_id):
+    key = ('item_categories:' + str(item_id))
     categories = model.r.lrange(key, 0, -1)
     return categories
 
@@ -256,12 +361,14 @@ def get_similar_dishes(dish_id):
     print key
     matches = model.r.lrange(key, 0, -1)
     print matches
-    similar_dishes = []
-    for item_id in matches:
-        item_id = int(item_id)
-        item = model.session.query(model.Item).get(item_id)
-        similar_dishes.append(item)
-    print similar_dishes
+    if matches == []:
+        similar_dishes = []
+    else:
+        similar_dishes = []
+        for item_id in matches:
+            item_id = int(item_id)
+            item = model.session.query(model.Item).get(item_id)
+            similar_dishes.append(item)
     return similar_dishes
 
 

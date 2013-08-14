@@ -56,8 +56,10 @@ def item_details(item_id):
     menus = sorted(menus, reverse=True)
     menu_count = len(menus)
     similarities = controller.get_similar_dishes(item_id)
-    techniques = model.r.lrange(('item_techniques:' + str(item_id)), 0, -1)
-    categories = model.r.lrange(('item_categories:' + str(item_id)), 0, -1)
+    if similarities == []:
+        similarities = ['no similar items found']
+    techniques = controller.get_techniques_for_dish(item_id)
+    categories = controller.get_categories_for_dish(item_id)
     return render_template("item.html", item=item, 
                                         menus=menus,
                                         similarities=similarities,
@@ -90,7 +92,6 @@ def restaurant_details(restaurant_id):
     restaurant = model.session.query(model.Restaurant).get(restaurant_id)
     menu_count = len(restaurant.menus)
     menus = sorted(restaurant.menus)
-    print menus
     return render_template("restaurant.html", restaurant=restaurant,
                                               menus=menus, 
                                               count=menu_count)
@@ -98,7 +99,7 @@ def restaurant_details(restaurant_id):
 
 @app.route("/technique/<technique>")
 def technique_details(technique):
-    dishes = controller.find_dishes_by_technique(technique)
+    dishes = controller.find_dishes_by_technique(technique, limit=50)
     count = len(dishes)
     return render_template("technique.html", technique=technique,
                                              dishes=dishes,
@@ -107,7 +108,7 @@ def technique_details(technique):
 
 @app.route("/category/<category>")
 def category_details(category):
-    dishes = controller.find_dishes_by_category(category)
+    dishes = controller.find_dishes_by_category(category, limit=50)
     count = len(dishes)
     return render_template("category.html", category=category,
                                             dishes=dishes,
@@ -117,12 +118,14 @@ def category_details(category):
 
 @app.route("/explore_techniques")
 def explore_techniques():
-    return render_template("explore_techniques.html")
+    results = controller.find_dishes_select_techniques()
+    return render_template("explore_techniques.html", results=results)
 
 
 @app.route('/explore_categories')
 def explore_categories():
-    return render_template("explore_categories.html")
+    results = controller.find_dishes_select_categories()
+    return render_template("explore_categories.html", results=results)
 
 
 @app.route('/decade_results/')
@@ -146,9 +149,11 @@ def year_display(year):
     menu_count = controller.count_menus_by_year(year)
     item_count = controller.total_dishes_per_year(year)
     popular = controller.get_popular_dishes_year(year)
+    menus = controller.find_menus_by_year(year, limit=50)
     return render_template('year.html', year=year,
                                         menu_count=menu_count,
                                         item_count = item_count,
+                                        menus=menus,
                                         popular = popular)
 
 
@@ -157,9 +162,8 @@ def item_results():
     keyword = request.args.get('search')
     keyword_cap = keyword.capitalize()
     results = controller.find_dishes_by_keyword(keyword_cap)
-    if results == False:
-        results = ["No results found."]
     count = len(results)
+    print results
     return render_template("item_results.html", keyword=keyword, 
                                                 results=results,
                                                 count=count)

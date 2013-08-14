@@ -3,6 +3,7 @@ import redis
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Float, create_engine, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref, scoped_session
+from titlecase import titlecase
 
 engine = create_engine('postgresql+psycopg2://alm:password@localhost/menus2')
 # for heroku deploy, will need to modify this to point to DATABASE_URL.
@@ -131,37 +132,55 @@ class Item(Base):
         return ingredients
 
     @property
-    def first_datestring(self):
+    def firstdate(self):
         months = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 
                  7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
-        month = months[self.date.month]
-        day = str(self.date.day)
-        year = str(self.date.year)
-        date = "date unknown"
-        if self.date.day:
-            date = month + ' ' + day + ',' + ' ' + year
-        elif self.date.month:
-            date = month + ' ' + year
-        elif self.date.year:
-            date = year
-        return date
+        dates = sorted(self.dates)
+        firstdate = dates[0]
+        month = months[firstdate.month]
+        day = str(firstdate.day)
+        year = str(firstdate.year)
+        if firstdate.day:
+            firstdate = month + ' ' + day + ',' + ' ' + year
+        elif firstdate.month:
+            firstdate = month + ' ' + year
+        elif firstdate:
+            firstdate = year
+        else:
+            firstdate = 'date unknown'
+        return firstdate
+
+    # @property
+    # def latest_datestring(self):
+    #     months = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 
+    #              7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
+    #     month = months[self.date.month]
+    #     day = str(self.date.day)
+    #     year = str(self.date.year)
+    #     date = "date unknown"
+    #     if self.date.day:
+    #         date = month + ' ' + day + ',' + ' ' + year
+    #     elif self.date.month:
+    #         date = month + ' ' + year
+    #     elif self.date.year:
+    #         date = year
+    #     return date
 
     @property
-    def latest_datestring(self):
-        months = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 
-                 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
-        month = months[self.date.month]
-        day = str(self.date.day)
-        year = str(self.date.year)
-        date = "date unknown"
-        if self.date.day:
-            date = month + ' ' + day + ',' + ' ' + year
-        elif self.date.month:
-            date = month + ' ' + year
-        elif self.date.year:
-            date = year
-        return date
+    def prices(self):
+        prices = []
+        menus = self.menus
+        for menu in menus:
+            price = menu.price
+            prices.append(price)
+        prices = sorted(prices)
+        return prices
 
+
+    @property
+    def name(self):
+        name = titlecase(self.description)
+        return name
 
 
 class MenuItem(Base):
@@ -174,6 +193,7 @@ class MenuItem(Base):
 
     item = relationship("Item", backref=backref("menuitem"))
     menu = relationship("Menu", backref=backref("menuitem"))
+
  
 
 def main():
