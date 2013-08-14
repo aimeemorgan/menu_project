@@ -2298,11 +2298,7 @@ a.list-group-item.active .list-group-item-text {
 }
 
 .panel {
-<<<<<<< HEAD
   max-width: 33%;
-=======
-  max-width: 25%;
->>>>>>> f0aeaa3add6cef9bc491f2fa58b282d778078450
   padding: 10px;
   padding-top: 10px;
   padding-bottom: 5px;
@@ -4536,9 +4532,7 @@ td.visible-print {
 
 body {
   padding-top: 80px;
-<<<<<<< HEAD
   max-width: 80%;
-=======
->>>>>>> f0aeaa3add6cef9bc491f2fa58b282d778078450
+
 }
 

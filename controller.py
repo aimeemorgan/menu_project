@@ -134,17 +134,13 @@ def find_dishes_by_keyword(keyword):
 
 
 def find_dishes_by_technique(technique):
-<<<<<<< HEAD
     key = ('technique_items:') + technique
     items = model.r.lrange(key, 0, -1)
     dishes = []
     for item in items:
-        dish = model.session.query(model.Item).get(int(item))
+        item_id = int(item)
+        dish = model.session.query(model.Item).get(item_id)
         dishes.append(dish)
-=======
-    dishes = model.session.query(model.Item).filter(
-                model.Item.technique.like('%' + technique + '%')).all()
->>>>>>> f0aeaa3add6cef9bc491f2fa58b282d778078450
     return dishes
 
 
@@ -153,7 +149,8 @@ def find_dishes_by_category(category):
     items = model.r.lrange(key, 0, -1)
     dishes = []
     for item in items:
-        dish = model.session.query(model.Item).get(int(item))
+        item_id = int(item)
+        dish = model.session.query(model.Item).get(item_id)
         dishes.append(dish)
     return dishes
 
