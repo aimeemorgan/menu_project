@@ -3,9 +3,16 @@
  <title>Menu Scout: category details</title>
 {% endblock %}
 {% block content %}
-<h1>Category: {{ category }} </h1>
-<h2>Items in this category:</h2>
+<h2>Category: {{ category }} </h2>
+<p>Note: categorization of menu items is an experimental feature. Some classification terms
+	assigned to items may not be accurate. You can report these to menuscout AT gmail.com.</p>
+<h3>Items in this category ({{ count }} total):</h3>
 <p>(click to see item details)</p>
+<ul class="list-group">
+{% for item in dishes %}
+    <li class="list-group-item"><a href="../item/{{ item.id }}">{{ item.description }}</a></li>
+{% endfor %}
+</ul>
 {% endblock %}
 {% block footer %}
 {% endblock %}

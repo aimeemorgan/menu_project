@@ -54,6 +54,7 @@ def counts_for_all_decades():
 
 
 def find_menus_by_year(year):
+    print "now entering find menus by year", year
     menus = model.session.query(model.Menu).filter(
         model.Menu.date >= datetime(year, 1, 1)).filter(
         model.Menu.date <= datetime(year, 12, 31)).all()
@@ -61,12 +62,14 @@ def find_menus_by_year(year):
 
 
 def find_menus_by_decade(year):
+    print "now entering find_menus by decade", year
     endyear = year + 10
     menu_list = []
-    while year < endyear:
+    for year in range(year, endyear):
         menus = find_menus_by_year(year)
         for menu in menus:
             menu_list.append(menu)
+            print menu
     return menu_list
 
 
@@ -77,7 +80,7 @@ def get_total_menus():
 
 def get_random_menu():
     count = get_total_menus()
-    num = randint(12463, count)
+    num = randint(12463, count+12463)
     menu = model.session.query(model.Menu).get(num)
     if menu == None:
         menu = get_random_menu()
@@ -131,21 +134,29 @@ def find_dishes_by_keyword(keyword):
 
 
 def find_dishes_by_technique(technique):
-    dishes = model.session.query(model.Item).filter(
-                model.Item.technique.like('%' + technique + '%')).all()
+    key = ('technique_items:') + technique
+    items = model.r.lrange(key, 0, -1)
+    dishes = []
+    for item in items:
+        dish = model.session.query(model.Item).get(int(item))
+        dishes.append(dish)
     return dishes
 
 
 def find_dishes_by_category(category):
     key = ('category_items:' + category)
-    dishes = model.r.lrange(key, 0, -1)
+    items = model.r.lrange(key, 0, -1)
+    dishes = []
+    for item in items:
+        dish = model.session.query(model.Item).get(int(item))
+        dishes.append(dish)
     return dishes
 
 
 def find_categories_for_dish(dish):
     key = ('item_categories:' + int(dish.id))
-    dishes = model.r.lrange(key, 0, -1)
-    return dishes
+    categories = model.r.lrange(key, 0, -1)
+    return categories
 
 
 def count_dish_by_year(dish, year):
@@ -199,8 +210,8 @@ def get_popular_dishes_year(year):
     results = model.r.lrange(('popular_year:' + str(year)), 0, -1)
     popular_items = []
     for result in results:
-        result = int(result)
-        item = model.session.query(model.Item).get(result)
+        item_id = int(result)
+        item = model.session.query(model.Item).get(item_id)
         popular_items.append(item)
     return popular_items
 
@@ -209,10 +220,10 @@ def get_popular_dishes_decade(decade):
     results = model.r.lrange(('popular_decade:' +str(decade)), 0, -1)
     popular_items = []
     for result in results:
-        result = int(result)
-        item = model.session.query(model.Item).get(result)
+        item_id = int(result)
+        item = model.session.query(model.Item).get(item_id)
         popular_items.append(item)
-    return results
+    return popular_items
 
 
 # move these to data_processing, persist in redis, write
@@ -239,12 +250,16 @@ def get_popular_dishes_decade(decade):
 
 def get_similar_dishes(dish_id):
 # return list of dishes that are most similar to <dish>
-    matches = model.r.lrange(('similarities_item:' + str(dish_id)), 0, -1)
+    key = 'similarities_item:' + str(dish_id)
+    print key
+    matches = model.r.lrange(key, 0, -1)
+    print matches
     similar_dishes = []
     for item_id in matches:
         item_id = int(item_id)
         item = model.session.query(model.Item).get(item_id)
         similar_dishes.append(item)
+    print similar_dishes
     return similar_dishes
 
 

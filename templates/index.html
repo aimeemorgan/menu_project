@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block head %}
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
       google.load("visualization", "1", {packages:["corechart"]});
       google.setOnLoadCallback(drawChart);
@@ -15,7 +15,7 @@
 
         var options = {
           title: 'Menu Count by Decade',
-          hAxis: {title: 'Decade', titleTextStyle: {color: 'red'}}
+          hAxis: {title: 'Decade', titleTextStyle: {color: 'blue'}}
         };
 
         var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));

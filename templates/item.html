@@ -3,45 +3,35 @@
 <title>Menu Scout: item details</title>
 {% endblock %}
 {% block content %}
-    <h1>Item details for {{ item.description }} (item #{{ item.id }})</h1>
+    <h2>Item details for {{ item.description }} (item #{{ item.id }})</h2>
     <p>Categories:</p>
         <ul> 
-        {% if techniques != [] %}
             {% for category in categories %}
                 <li><a href="../category/{{ category }}">{{ category }}</a></li>
             {% endfor %}
-        {% else %}
-            <li>no technique identified</li>
-        {% endif %}
     </ul>
     <p>Technique(s):</p>
     <ul> 
-        {% if techniques != [] %}
-            {% for technique in techniques %}
-                <li><a href="../technique/{{ technique }}">{{ technique }}</a></li>
-            {% endfor %}
-        {% else %}
-            <li>no technique identified</li>
-        {% endif %}
+        {% for technique in techniques %}
+            <li><a href="../technique/{{ technique }}">{{ technique }}</a></li>
+        {% endfor %}
+
     </ul>
-    <p>Date of first appearance: {{ item.first_year.year }}/{{ item.first_year.month }}/{{ item.first_year.day }} </p>
-    <p>Date of latest appearance: {{ item.latest_year.year }}/{{ item.latest_year.month }}/{{ item.latest_year.day }} </p>
+<!--     <p>Date of first appearance: {{ item.first_datestring }}</p>
+    <p>Date of latest appearance: {{ item.latest_datestring }} </p>
     <p>Lowest price: ${{ item.low_price }} </p>
-    <p>Highest price: ${{ item.high_price }}</p>
-    <h2>Menus on which this dish appears ({{ count }} total):</h2>
+    <p>Highest price: ${{ item.high_price }}</p> -->
+    <h3>Menus on which this dish appears ({{ count }} total):</h3>
     <ul>
     {% for menu in menus %}
-        <li><a href="../menu/{{ menu.id }}">{{ menu.restaurant.name }} {{ menu.date.year }}/{{ menu.date.month }}/{{ menu.date.day }}</a></li>
+        <li><a href="../menu/{{ menu.id }}">{{ menu.restaurant.name }}, {{ menu.datestring }}</a></li>
     {% endfor %}
     </ul>
-    <h2>Possible similar items in the collection</h2>
-    <h3>(note: this feature is experimental!)</h3>
+    <h3>Possible similar items in the collection</h3>
+    <p>Matching similar items is an experimental feature, so you might see some odd matches.</p>
     <ul>
     {% for s in similarities %}
         <li><a href="../item/{{ s.id }}">{{ s.description }}</a></li>
     {% endfor %}
     </ul>
-    <h2>Items which frequently appear on menus with this one</h2>
-    <p>[list of items goes here]
-    <h3>chart with this item's appearances on menus over time?</h3>
 {% endblock %}

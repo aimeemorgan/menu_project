@@ -123,6 +123,10 @@ def id_techniques(dish_id, corpus):
                     'selected': 0, 'imported': 0, 'w': 0, 'o': 0,'k': 0,
                     'u': 0,}
     for word in dish_words:
+        if word == 'roast':
+            techniques.append('roasted')
+        if word == 'sautee':
+            techniques.append('sauteed')
         if len(word) > 2:
             suffix = (word[-2:]).encode('utf-8')
             if suffix == 'ed':
@@ -167,23 +171,6 @@ def most_popular_dishes(year):
     return frequencies[0:10]
 
 
-def most_popular_dishes_decade(decade):
-    menus = find_menus_by_decade(decade)
-    all_items = {}
-    frequencies = []
-    for menu in menus:
-        items = menu.get_items()
-        for item in items:
-            if item != False:
-                print item
-                all_items.setdefault(item, 0)
-                all_items[item] +=1
-    for item, count in all_items.items():
-        frequencies.append((count, item))
-    frequencies = sorted(frequencies, reverse=True)
-    return frequencies[0:10]
-
-
 def most_popular_all_years():
 # return a dict where key = year, value = list of 10 most
 # popular dishes
@@ -200,19 +187,39 @@ def most_popular_all_years():
     return most_popular
 
 
+def most_popular_dishes_decade(decade):
+    print "now entering: most_popular_dishes_decade", decade
+    menus = find_menus_by_decade(decade)
+    all_items = {}
+    frequencies = []
+    for menu in menus:
+        items = menu.get_items()
+        for item in items:
+            if item != False:
+                print item
+                all_items.setdefault(item, 0)
+                all_items[item] +=1
+    for item, count in all_items.items():
+        frequencies.append((count, item))
+    frequencies = sorted(frequencies, reverse=True)
+    print frequencies
+    return frequencies[0:10]
+
+
 def most_popular_all_decades():
-    most_popular = {}
+    print "now entering: most_popular_all_decades"
     for decade in range(1850, 2011, 10):
-        items = most_popular_dishes_decade(decade)
-        most_popular.setdefault(decade, [])
-        if items:
-            for item in items:
-                if item != None:
-                    print item
-                    most_popular[decade].append(item[1].id)
-            persist_most_popular_decades(decade, most_popular)
-            print decade, most_popular[decade]
-    return most_popular
+        popular = most_popular_dishes_decade(decade)
+        if popular:
+            results = []
+            for item in popular:
+                result = item[1].id
+                results.append(result)
+            persist_most_popular_decades(decade, results)
+            print decade, results
+        else:
+            persist_most_popular_decades(decade, ['no popular items found'])
+    return "SUCCESS"
 
 
 def persist_most_popular_years(year, most_popular):
@@ -223,11 +230,11 @@ def persist_most_popular_years(year, most_popular):
     model.r.save
 
 
-def persist_most_popular_decades(decade, most_popular):
-    items = most_popular[decade] 
+def persist_most_popular_decades(decade, items):
     for item in items:
         key = ('popular_decade:%s') % decade
         model.r.lpush(key, item)
+    print "PERSISTED: ", decade   
     model.r.save
 
 

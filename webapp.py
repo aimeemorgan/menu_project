@@ -14,20 +14,15 @@ app = Flask(__name__)
 def shutdown_session(exception=None):
     model.session.remove()
 
+
 @app.route("/")
 def index():
-    # generate counts for main map of menus by decade
+    # generate counts for main chart of menus by decade
     decade_list = controller.counts_for_all_decades()
-    random_item = controller.get_random_dish()
-    random_menu = controller.get_random_menu()
-    random_restaurant = controller.get_random_restaurant()
     menu_total = controller.get_total_menus()
     item_total = controller.get_total_dishes()
     restaurant_total = controller.get_total_restaurants()
     return render_template("index.html", decade_list=decade_list, 
-                                         random_item=random_item,
-                                         random_menu=random_menu,
-                                         random_restaurant=random_restaurant,
                                          menu_total=menu_total,
                                          restaurant_total=restaurant_total,
                                          item_total=item_total)
@@ -36,6 +31,19 @@ def index():
 @app.route("/about")
 def about():
     return render_template("about.html")
+
+
+@app.route("/random/<selection>")
+def get_random(selection):
+    if selection == 'menu':
+        menu = controller.get_random_menu()
+        return redirect('../menu/' + str(menu.id))
+    elif selection == 'restaurant':
+        restaurant = controller.get_random_restaurant()
+        return redirect('../restaurant/' + str(restaurant.id))
+    else:
+        item = controller.get_random_dish()
+        return redirect('../item/' + str(item.id))
 
 
 @app.route("/item/<int:item_id>")
@@ -68,8 +76,8 @@ def menu_details(menu_id):
     item_count = len(items)
     other_restaurant_menus = []
     menus = menu.restaurant.menus
-    for j in menus:
-        other_restaurant_menus.append(j)
+    # for j in menus:
+    #     other_restaurant_menus.append(j)
     menu_count = len(menus)
     # similarities = controller.get_similar_menus(menu_id)
     return render_template("menu.html", menu=menu, 
@@ -93,20 +101,21 @@ def restaurant_details(restaurant_id):
 
 @app.route("/technique/<technique>")
 def technique_details(technique):
-    items = model.r.lrange(('technique_items:' + technique), 0, -1)
-    dishes = []
-    for item in items:
-        dish = model.session.query(model.Item).get(int(item))
-        dishes.append(dish)
+    dishes = controller.find_dishes_by_technique(technique)
+    count = len(dishes)
     return render_template("technique.html", technique=technique,
-                                             dishes=dishes)
+                                             dishes=dishes,
+                                             count=count)
 
 
 @app.route("/category/<category>")
 def category_details(category):
-    ##!!!!!!!!!!!!!technique = model.session.query(model.Technique).get(technique_id)
-    ##get list of items with this technique
-    return render_template('category.html', category=category)
+    dishes = controller.find_dishes_by_category(category)
+    count = len(dishes)
+    return render_template("category.html", category=category,
+                                            dishes=dishes,
+                                            count=count)
+
 
 
 @app.route("/explore_techniques")
@@ -128,8 +137,10 @@ def decade_results():
 @app.route('/decade/<int:decade>')
 def decade_display(decade):
     yearlist = controller.counts_for_all_years(decade)
-    print yearlist
-    return render_template('decade.html', decade=decade,
+    popular = controller.get_popular_dishes_decade(decade)
+    print popular
+    return render_template('decade.html', popular=popular,
+                                          decade=decade,
                                           yearlist=yearlist)
 
 
@@ -138,7 +149,6 @@ def year_display(year):
     menu_count = controller.count_menus_by_year(year)
     item_count = controller.total_dishes_per_year(year)
     popular = controller.get_popular_dishes_year(year)
-    print popular
     return render_template('year.html', year=year,
                                         menu_count=menu_count,
                                         item_count = item_count,

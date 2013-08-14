@@ -4,25 +4,33 @@
 {% endblock %}
 {% block content %}
     <h1>Menu details for menu #{{ menu.id }}</h1>
-    <p><a href="../restaurant/{{ menu.restaurant.id }}">{{ menu.restaurant.name }}</a>, {{ menu.date.year }}/{{ menu.date.month }}/{{ menu.date.day }}</p>
+    <p>Restaurant: <a href="../restaurant/{{ menu.restaurant.id }}">{{ menu.restaurant.name }}</a></p> 
+    <p>Menu date: {{ menu.datestring }}</p>
     <h2>Items on this menu ({{ item_count }} total)</h2>
-    <ul>
-    {% for item in items %}
-        <li class="list-group-item"><a href="../item/{{ item.id }}">{{ item.description }}</a></li>
-    {% endfor %}
-    </ul>
-    <h2>Other menus close to this date</h2>
-    <p>[list goes here]</p>
+    <table class="table table-striped" width="75%">
+        <thead>
+            <td width="60%">Item</td>
+            <td>Price (if known)</td>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr>
+                    <td><a href="../item/{{ item.id }}">{{ item.description }}</td>
+                    <td>${{item.menus.price }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     <h2>Other menus from the same restaurant ({{ menu_count }} total):</h2>
     <ul>
     {% for menu in menus %}
-        <li><a href="../menu/{{ menu.id }}">{{ menu.restaurant.name }}, {{ menu.date.year }}</a></li>
+        <li><a href="../menu/{{ menu.id }}">{{ menu.restaurant.name }}, {{ menu.datestring }}</a></li>
     {% endfor %}
     </ul>
     <h2>Similar menus in the collection</h2>
    	<ul>
     {% for s in similarities %}
-        <li><a href="../item/{{ menu.id }}">{{ s.restaurant.name }}, {{ s.date.year }}</a></li>
+        <li><a href="../item/{{ menu.id }}">{{ s.restaurant.name }}, {{ s.datestring }}</a></li>
     {% endfor %}
     </ul>
 {% endblock %}

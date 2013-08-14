@@ -28,6 +28,7 @@ class Restaurant(Base):
 
     menus = relationship("Menu", backref=backref("restaurant"))
 
+
     def __repr__(self):
         name = self.name.encode('utf-8')
         location = self.location.encode('utf-8')
@@ -71,6 +72,23 @@ class Menu(Base):
         return len(self.items)
 
 
+    @property
+    def datestring(self):
+        months = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 
+                 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
+        month = months[self.date.month]
+        day = str(self.date.day)
+        year = str(self.date.year)
+        datestring = "date unknown"
+        if self.date.day:
+            datestring = month + ' ' + day + ',' + ' ' + year
+        elif self.date.month:
+            datestring = month + ' ' + year
+        elif self.date.year:
+            datestring = year
+        return datestring
+
+
 class Item(Base): 
     __tablename__ = "items"
 
@@ -111,6 +129,39 @@ class Item(Base):
         for ingredient in self.ingredients:
             ingredients.append(ingredient.menu.restaurant)
         return ingredients
+
+    @property
+    def first_datestring(self):
+        months = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 
+                 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
+        month = months[self.date.month]
+        day = str(self.date.day)
+        year = str(self.date.year)
+        date = "date unknown"
+        if self.date.day:
+            date = month + ' ' + day + ',' + ' ' + year
+        elif self.date.month:
+            date = month + ' ' + year
+        elif self.date.year:
+            date = year
+        return date
+
+    @property
+    def latest_datestring(self):
+        months = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 
+                 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
+        month = months[self.date.month]
+        day = str(self.date.day)
+        year = str(self.date.year)
+        date = "date unknown"
+        if self.date.day:
+            date = month + ' ' + day + ',' + ' ' + year
+        elif self.date.month:
+            date = month + ' ' + year
+        elif self.date.year:
+            date = year
+        return date
+
 
 
 class MenuItem(Base):

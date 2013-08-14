@@ -31,7 +31,10 @@ def id_category(dish, corpus, lexicon_lists):
             if word in lexicon:
                 if category not in categories:
                     categories.append(category)
-    return categories
+    if len(categories) > 0:
+        return categories
+    else:
+        return ['unknown']
 
 
 def categories_for_corpus(corpus, lexicon_lists):

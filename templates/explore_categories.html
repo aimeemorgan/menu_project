@@ -6,7 +6,19 @@
 <h2>Explore by Food Categories</h2>
 <p>Note: categorization of menu items is an experimental feature. Some classification terms
 	may not be accurate. You can report these to menuscout AT gmail.com.</p>
-<p>pie chart of top categories?</p>
+<table class="table">
+	<thead>
+		<td width="40%">Category (click on name to see all items)</td><td>Sample items</td>
+	</thead>
+	<tbody>
+		{% for item in results %}
+		<tr>
+			<td>{{ item[0] }} (total items: )</td>
+			<td>(sample items), more...</td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
 {% endblock %}
 {% block footer %}
 {% endblock %}

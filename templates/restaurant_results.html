@@ -3,11 +3,11 @@
 <title>Menu Scout: restaurant search </title>
 {% endblock %}
 {% block content %}
-<h1>Results for your search "{{ keyword }}" ({{ count }} total):</h1>
+<h2>Results for your search "{{ keyword }}" ({{ count }} total):</h2>
 <p>(click on a result to see detailed information about it.)</p>
-<ul>
+<ul class="list-group">
 {% for restaurant in results %}
-    <li><a href="../restaurant/{{ restaurant.id }}">{{ restaurant.name }}</a></li>
+    <li class="list-group-item"><a href="../restaurant/{{ restaurant.id }}">{{ restaurant.name }}</a></li>
 {% endfor %}
 </ul>
 {% endblock %}

@@ -6,7 +6,6 @@ from data_processing import build_dish_corpus, build_menu_corpus
 ## main all pairs function
 
 def all_pairs(corpus, t):
-# refactor to save results directly into redis?
     index = {}
     results = {}
     count = 0
@@ -40,7 +39,7 @@ def find_matches(item_id, index, corpus, t):
                     a[item[0]] += (item[1] * weight)
     for item_id, score in a.items():
         if score >= t:
-            matches.append((item_id, item[0], score))
+            matches.append((item_id, item[0]))
     return matches
 
 
@@ -61,8 +60,9 @@ def match_dictionary_for_db(results):
 def persist_matches(results):
     for item_id, matches in results.items():
         for match in matches:
-            key = ('similarities_item:' + str(item_id))
-            model.r.lpush(key, match)
+            if match != item_id:
+                key = ('similarities_item:' + str(item_id))
+                model.r.lpush(key, match)
     model.r.save
 
 
