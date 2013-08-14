@@ -183,12 +183,10 @@ def most_popular_all_years():
                 if item != None:
                     most_popular[year].append(item[1].id)
             persist_most_popular_years(year, most_popular)
-            print year, most_popular[year]
     return most_popular
 
 
 def most_popular_dishes_decade(decade):
-    print "now entering: most_popular_dishes_decade", decade
     menus = find_menus_by_decade(decade)
     all_items = {}
     frequencies = []
@@ -196,18 +194,15 @@ def most_popular_dishes_decade(decade):
         items = menu.get_items()
         for item in items:
             if item != False:
-                print item
                 all_items.setdefault(item, 0)
                 all_items[item] +=1
     for item, count in all_items.items():
         frequencies.append((count, item))
     frequencies = sorted(frequencies, reverse=True)
-    print frequencies
     return frequencies[0:10]
 
 
 def most_popular_all_decades():
-    print "now entering: most_popular_all_decades"
     for decade in range(1850, 2011, 10):
         popular = most_popular_dishes_decade(decade)
         if popular:

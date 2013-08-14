@@ -5,17 +5,16 @@
 {% block content %}
     <h2>Item details for {{ item.name }} (item #{{ item.id }})</h2>
     <p>Categories:</p>
-        <ul> 
-            {% for category in categories %}
-                <li><a href="../category/{{ category }}">{{ category }}</a></li>
-            {% endfor %}
+    <ul> 
+        {% for category in categories %}
+            <li><a href="../category/{{ category }}">{{ category }}</a></li>
+        {% endfor %}
     </ul>
     <p>Technique(s):</p>
     <ul> 
         {% for technique in techniques %}
             <li><a href="../technique/{{ technique }}">{{ technique }}</a></li>
         {% endfor %}
-
     </ul>
     <p>Date of first appearance: {{ item.firstdate }}</p>
     <p>Date of latest appearance: {{ item.latest_datestring }} </p>

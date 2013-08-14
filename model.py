@@ -140,9 +140,9 @@ class Item(Base):
         month = months[firstdate.month]
         day = str(firstdate.day)
         year = str(firstdate.year)
-        if firstdate.day:
+        if day:
             firstdate = month + ' ' + day + ',' + ' ' + year
-        elif firstdate.month:
+        elif month:
             firstdate = month + ' ' + year
         elif firstdate:
             firstdate = year

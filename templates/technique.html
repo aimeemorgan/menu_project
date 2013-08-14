@@ -6,8 +6,10 @@
 <h2>Technique details: '{{ technique }}'</h2>
 <p>Note: categorization of menu items by technique is an experimental feature. Some techniques
 	assigned to items may not be accurate. You can report these to menuscout AT gmail.com.</p>
+	<small>Technique browse currently limited to 50 items per category.</small>
 <h3>Items with this technique ({{ count }} total):</h3>
-<p>(click to see item details)</p>
+
+<p>Click to see item details</p>
 <ul class="list-group">
 {% for item in dishes %}
     <li class="list-group-item"><a href="../item/{{ item.id }}">{{ item.description }}</a></li>

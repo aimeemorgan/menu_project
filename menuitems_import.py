@@ -1,6 +1,13 @@
 import csv
 
 
+#########
+# Copy the resulting CSV file into postgres as follows:
+
+# COPY menuitems from '/home/alm/src/hackbright_project/ref_docs/menuitems.csv' 
+# DELIMITERS ',' CSV;
+#########
+
 def build_menuid_dict():
 # map menu_page_ids to menu_ids
     with open('./ref_files/MenuPage.csv') as csvfile:

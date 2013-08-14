@@ -222,7 +222,6 @@ def find_dishes_select_techniques():
     for technique in techqniues.keys():
         technique_lowercase = technique.lower()
         dishes = find_three_dishes_by_technique(technique_lowercase)
-        print dishes
         results.append((technique, dishes))
     return results
 
@@ -331,28 +330,6 @@ def get_popular_dishes_decade(decade):
         item = model.session.query(model.Item).get(item_id)
         popular_items.append(item)
     return popular_items
-
-
-# move these to data_processing, persist in redis, write
-# new controller functions to retrieve
-# def dish_frequency_by_decade(dish, year):
-#     dish_total = float(count_dish_by_decade(dish, year))
-#     decade_total = float(total_dishes_per_decade(year))
-#     return dish_total / decade_total
-
-
-# def dish_frequency_decade_for_corpus(year, corpus):
-#     dish_frequencies = {}
-#     for dish in corpus:
-#         dish_frequencies[dish] = dish_frequency_by_decade(dish, year)
-#     return dish_frequencies
-
-
-# def dish_frequency_decade_sorted(dish_frequencies):
-#     freq = []
-#     for dish, frequency in dish_frequencies.items():
-#         freq.append((frequency, dish))
-#     return sorted(freq)
 
 
 def get_similar_dishes(dish_id):
