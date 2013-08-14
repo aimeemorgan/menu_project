@@ -10,7 +10,7 @@ menuitems_import.py: For creating links between menus and items. Generates a CSV
 
 
 DATA PROCESSING TOOLS
-(Run in interactive mode to generate and persist information about the dataset. 
+(Run in interactive mode to generate and persist information about the dataset.)
 
 restaurant_dedup.py: Cleans up Restaurants database table by identifying and merging duplicate entries.
  
