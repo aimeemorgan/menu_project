@@ -2,8 +2,33 @@ Hackbright final project using the New York Public Library's "What's on the Menu
 More information at http://aimeecodes.blogspot.com/2013/07/project-plan-reveal.html.
 
 IMPORT TOOLS
-(for importing data from NYPL's CSV files)
+(For importing data from NYPL's CSV files)
 
 data_import.py: Imports information on menus, items, and restaurants
 
-menuitems_import.py: For creating links between menus and items. 
+menuitems_import.py: For creating links between menus and items. Generates a CSV file for copying into postgres database.
+
+
+DATA PROCESSING TOOLS
+(Run in interactive mode to generate and persist information about the dataset. 
+
+restaurant_dedup.py: Cleans up Restaurants database table by identifying and merging duplicate entries.
+ 
+data_processing.py: Various data processing functions. Required controller.py and model.py.
+
+all_pairs.py: Implementation of basic all pairs matching algorithm for finding similar items / similar menus.
+
+classifier.py: Tool for assigning categories to dishes.
+
+lexicon.py: Sets up lexicons used by the classifier. Lexicon lists are stored as text files in /lexicons.
+
+model.py: Defines classes for restaurants, 
+
+
+FRONT END
+
+webapp.py: Handlers for web requests. Requires model.py and controller.py.
+
+controller.py: Functions for querying the database and returning results to webapp.py.
+
+templates/: Jinja templates for use by webapp.py handlers.
