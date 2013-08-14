@@ -19,6 +19,12 @@ def shutdown_session(exception=None):
 def index():
     # generate counts for main chart of menus by decade
     decade_list = controller.counts_for_all_decades()
+<<<<<<< HEAD
+=======
+    random_item = controller.get_random_dish()
+    random_menu = controller.get_random_menu()
+    random_restaurant = controller.get_random_restaurant()
+>>>>>>> f0aeaa3add6cef9bc491f2fa58b282d778078450
     menu_total = controller.get_total_menus()
     item_total = controller.get_total_dishes()
     restaurant_total = controller.get_total_restaurants()
