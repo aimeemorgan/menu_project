@@ -114,14 +114,23 @@ def most_frequent_sorted(frequencies):
     return sorted(ranked_freq)
 
 
-def id_techniques(dish_id, corpus):
+def technique_stoplist():
+    stoplist = {}
+    filepath = './lexicon/technique_stoplist.txt'
+    f = open(filepath)
+    for row in f:
+        new_entry = row.strip().lower()
+        stoplist[new_entry] = 1
+    print stoplist
+    return stoplist
+
+
+def id_techniques(dish_id, corpus, stoplist):
 # identify verbs in dish descriptions as a way of classifying
 # by preparation methods.
     dish_words = corpus[dish_id]
     techniques = []
-    false_matches = {'n': 0, 'bed': 0, 'red': 0, 'served': 0, 'assorted': 0, 
-                    'selected': 0, 'imported': 0, 'w': 0, 'o': 0,'k': 0,
-                    'u': 0,}
+    stoplist = {}
     for word in dish_words:
         if word == 'roast':
             techniques.append('roasted')
@@ -130,7 +139,7 @@ def id_techniques(dish_id, corpus):
         if len(word) > 2:
             suffix = (word[-2:]).encode('utf-8')
             if suffix == 'ed':
-                if word not in false_matches:
+                if word not in stoplist:
                     techniques.append(word)
     if len(techniques) > 0:
         return techniques
@@ -138,9 +147,9 @@ def id_techniques(dish_id, corpus):
         return ['unknown']
 
 
-def techniques_for_corpus(corpus):
+def techniques_for_corpus(corpus, stoplist):
     for dish_id, text in corpus.items():
-        techniques = id_techniques(dish_id, corpus)
+        techniques = id_techniques(dish_id, corpus, stoplist)
         if techniques:
             for technique in techniques:
                 # add technique tags to dish, persist to redis
@@ -231,5 +240,4 @@ def persist_most_popular_decades(decade, items):
         model.r.lpush(key, item)
     print "PERSISTED: ", decade   
     model.r.save
-
 

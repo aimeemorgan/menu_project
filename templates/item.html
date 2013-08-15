@@ -17,13 +17,13 @@
         {% endfor %}
     </ul>
     <p>Date of first appearance: {{ item.firstdate }}</p>
-    <p>Date of latest appearance: {{ item.latest_datestring }} </p>
+    <p>Date of latest appearance: {{ item.lastdate }} </p>
     <p>Lowest price: ${{ item.prices[0] }} </p>
     <p>Highest price: ${{ item.prices[-1] }}</p>
     <h3>Menus on which this dish appears ({{ count }} total):</h3>
     <ul>
     {% for menu in menus %}
-        <li><a href="../menu/{{ menu.id }}">{{ menu.restaurant.name }}. {{ menu.datestring }}</a></li>
+        <li><a href="../menu/{{ menu[1].id }}">{{ menu[1].restaurant.name }}. {{ menu[1].datestring }}</a></li>
     {% endfor %}
     </ul>
     <h3>Possible similar items in the collection</h3>

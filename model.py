@@ -39,12 +39,12 @@ class Restaurant(Base):
         return sorted(self.menus)
 
     def earliest_menu_date(self):
-        sorted = self.get_menus_date_sorted
-        return sorted[0].date
+        sorted_menus = self.get_menus_date_sorted
+        return sorted_menus[0].date
 
     def latest_menu_date(self):
-        sorted = self.get_menus_date_sorted
-        return sorted[-1].date
+        sorted_menus = self.get_menus_date_sorted
+        return sorted_menus[-1].date
 
 
 class Menu(Base):
@@ -95,11 +95,11 @@ class Item(Base):
 
     id = Column(Integer, primary_key=True)
     description = Column(String, nullable=False)
-    first_year = Column(DateTime, nullable=True)
-    latest_year = Column(DateTime, nullable=True)
-    low_price = Column(Float, nullable=True)
-    high_price = Column(Float, nullable=True)
-    category = Column(String, nullable=True)
+    # first_year = Column(DateTime, nullable=True)
+    # latest_year = Column(DateTime, nullable=True)
+    # low_price = Column(Float, nullable=True)
+    # high_price = Column(Float, nullable=True)
+    # category = Column(String, nullable=True)
 
     menus = relationship("MenuItem", backref=backref("items"))
 
@@ -113,6 +113,21 @@ class Item(Base):
             menus.append(menu.menu)
         return menus
 
+    def get_menus_date_sorted(self):
+        menus = self.get_menus()
+        sortlist = []
+        dateless = []
+        for menu in menus:
+            if menu != None:
+                if menu.date != None:
+                    sortlist.append((menu.date, menu))
+                else:
+                    dateless.append(menu)
+        results = sorted(sortlist, reverse=True)
+        for menu in dateless:
+            results.append(('undated', menu))
+        return results
+
     def count_menus(self):
         return len(self.menus)
 
@@ -125,46 +140,6 @@ class Item(Base):
     def count_restaurants(self):
         return len(self.get_restaurants())
 
-    def get_ingredients(self):
-        ingredients = []
-        for ingredient in self.ingredients:
-            ingredients.append(ingredient.menu.restaurant)
-        return ingredients
-
-    @property
-    def firstdate(self):
-        months = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 
-                 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
-        dates = sorted(self.dates)
-        firstdate = dates[0]
-        month = months[firstdate.month]
-        day = str(firstdate.day)
-        year = str(firstdate.year)
-        if day:
-            firstdate = month + ' ' + day + ',' + ' ' + year
-        elif month:
-            firstdate = month + ' ' + year
-        elif firstdate:
-            firstdate = year
-        else:
-            firstdate = 'date unknown'
-        return firstdate
-
-    # @property
-    # def latest_datestring(self):
-    #     months = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 
-    #              7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
-    #     month = months[self.date.month]
-    #     day = str(self.date.day)
-    #     year = str(self.date.year)
-    #     date = "date unknown"
-    #     if self.date.day:
-    #         date = month + ' ' + day + ',' + ' ' + year
-    #     elif self.date.month:
-    #         date = month + ' ' + year
-    #     elif self.date.year:
-    #         date = year
-    #     return date
 
     @property
     def prices(self):
@@ -181,6 +156,32 @@ class Item(Base):
     def name(self):
         name = titlecase(self.description)
         return name
+
+    @property
+    def firstdate(item):
+        menus = item.get_menus_date_sorted()
+        for result in menus:
+            if result[0] == 'undated':
+                menus.remove(result)
+        for i in range ((len(menus)-1), 0, -1):
+            menu = menus[i][1]
+            if menu.date.year > 1850:
+                firstdate = menu.datestring
+                return firstdate
+        return item.lastdate
+
+    @property
+    def lastdate(item):
+        menus = item.get_menus_date_sorted()
+        for result in menus:
+            if result[0] == 'undated':
+                menus.remove(result)
+        for i in range (0, len(menus)):
+            menu = menus[i][1]
+            if menu.date.year < 2013:
+                lastdate = menu.datestring
+                return lastdate
+        return None
 
 
 class MenuItem(Base):

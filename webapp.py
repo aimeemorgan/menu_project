@@ -49,11 +49,7 @@ def get_random(selection):
 @app.route("/item/<int:item_id>")
 def item_details(item_id):
     item = model.session.query(model.Item).get(item_id)
-    menus = []    
-    for i in item.menus:
-        if i.menu != None:
-            menus.append(i.menu)
-    menus = sorted(menus, reverse=True)
+    menus = item.get_menus_date_sorted()
     menu_count = len(menus)
     similarities = controller.get_similar_dishes(item_id)
     if similarities == []:

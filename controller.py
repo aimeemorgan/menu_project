@@ -334,7 +334,7 @@ def get_popular_dishes_decade(decade):
 
 def get_similar_dishes(dish_id):
 # return list of dishes that are most similar to <dish>
-    key = 'similarities_item:' + str(dish_id)
+    key = 'item_similarities:' + str(dish_id)
     print key
     matches = model.r.lrange(key, 0, -1)
     print matches
