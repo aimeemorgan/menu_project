@@ -1,4 +1,5 @@
 import redis
+import locale
 
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Float, create_engine, ForeignKey
@@ -31,20 +32,50 @@ class Restaurant(Base):
 
 
     def __repr__(self):
-        name = self.name.encode('utf-8')
-        location = self.location.encode('utf-8')
+        name = self.name
+        location = self.location
         return '<Restaurant: %s. Location: %s>' % (name, location)
 
     def get_menus_date_sorted(self):
-        return sorted(self.menus)
+        menus = self.menus
+        sortlist = []
+        dateless = []
+        for menu in menus:
+            if menu != None:
+                if menu.date != None:
+                    sortlist.append((menu.date, menu))
+                else:
+                    dateless.append(menu)
+        results = sorted(sortlist)
+        for menu in dateless:
+            results.append(('undated', menu))
+        return results
 
-    def earliest_menu_date(self):
-        sorted_menus = self.get_menus_date_sorted
-        return sorted_menus[0].date
+    @property
+    def lastdate(self):
+        menus = self.get_menus_date_sorted()
+        for result in menus:
+            if result[0] == 'undated':
+                menus.remove(result)
+            for i in range (0, len(menus)):
+                menu = menus[i][1]
+                if menu.date.year > 1850:
+                    lastdate = menu.datestring
+                    return lastdate
+        return self.firstdate
 
-    def latest_menu_date(self):
-        sorted_menus = self.get_menus_date_sorted
-        return sorted_menus[-1].date
+    @property
+    def firstdate(self):
+        menus = self.get_menus_date_sorted()
+        for result in menus:
+            if result[0] == 'undated':
+                menus.remove(result)
+            for i in range ((len(menus)-1), -1, -1):
+                menu = menus[i][1]
+                if menu.date.year < 2013:
+                    firstdate = menu.datestring
+                    return firstdate
+        return None
 
 
 class Menu(Base):
@@ -61,7 +92,7 @@ class Menu(Base):
 
     def __repr__(self):
         return '<%s, %s>' % (self.date,
-                            (self.restaurant.name).encode('utf-8'))
+                            self.restaurant.name)
 
     def get_items(self):
         items = []
@@ -104,7 +135,7 @@ class Item(Base):
     menus = relationship("MenuItem", backref=backref("items"))
 
     def __repr__(self):
-        description = self.description.encode('utf-8')
+        description = self.description.encode
         return '<Item: %s>' % description
 
     def get_menus(self):
@@ -140,17 +171,37 @@ class Item(Base):
     def count_restaurants(self):
         return len(self.get_restaurants())
 
-
     @property
     def prices(self):
+        locale.setlocale( locale.LC_ALL, '' )
         prices = []
         menus = self.menus
         for menu in menus:
-            price = menu.price
-            prices.append(price)
+            if type(menu.price) == float:
+                price = locale.currency(menu.price)
+                prices.append(price)
         prices = sorted(prices)
         return prices
 
+    @property
+    def lowprice(self):
+        locale.setlocale( locale.LC_ALL, '' )
+        prices = self.prices
+        for i in range(0, len(prices)):
+            if prices[i]:
+                if prices[i] != 'unknown':
+                    return prices[i]
+        return "unknown"
+
+    @property
+    def highprice(self):
+        locale.setlocale( locale.LC_ALL, '' )
+        prices = self.prices
+        for i in range((len(prices)-1), -1, -1):
+            if prices[i]:
+                if prices[i] != 'unknown':
+                    return prices[i]
+        return self.lowprice
 
     @property
     def name(self):
@@ -158,21 +209,21 @@ class Item(Base):
         return name
 
     @property
-    def firstdate(item):
-        menus = item.get_menus_date_sorted()
+    def firstdate(self):
+        menus = self.get_menus_date_sorted()
         for result in menus:
             if result[0] == 'undated':
                 menus.remove(result)
-        for i in range ((len(menus)-1), 0, -1):
+        for i in range ((len(menus)-1), -1, -1):
             menu = menus[i][1]
             if menu.date.year > 1850:
                 firstdate = menu.datestring
                 return firstdate
-        return item.lastdate
+        return self.lastdate
 
     @property
-    def lastdate(item):
-        menus = item.get_menus_date_sorted()
+    def lastdate(self):
+        menus = self.get_menus_date_sorted()
         for result in menus:
             if result[0] == 'undated':
                 menus.remove(result)
@@ -194,8 +245,15 @@ class MenuItem(Base):
 
     item = relationship("Item", backref=backref("menuitem"))
     menu = relationship("Menu", backref=backref("menuitem"))
-
- 
+    
+    @property
+    def stringprice(self):
+        locale.setlocale( locale.LC_ALL, '' )
+        if self.price != None:
+            stringprice = locale.currency(self.price)
+        else:
+            stringprice = "unknown"
+        return stringprice
 
 def main():
     pass

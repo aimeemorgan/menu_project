@@ -1,7 +1,7 @@
 import model
 import nltk
 import re
-from controller import find_menus_by_year, find_menus_by_decade
+from helper import find_menus_by_year, find_menus_by_decade
 from nltk.corpus import stopwords
 #from lexicon import lexicon_names, lexicon_setup
 
@@ -137,7 +137,7 @@ def id_techniques(dish_id, corpus, stoplist):
         if word == 'sautee':
             techniques.append('sauteed')
         if len(word) > 2:
-            suffix = (word[-2:]).encode('utf-8')
+            suffix = (word[-2:])
             if suffix == 'ed':
                 if word not in stoplist:
                     techniques.append(word)

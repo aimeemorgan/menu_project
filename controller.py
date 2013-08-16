@@ -1,365 +1,196 @@
+#!/usr/bin/python
+
+from flask import Flask, render_template, redirect, request
 import model
-from datetime import datetime
-from random import randint
+import helper
+import os, sys
+
+sys.path.append(os.getcwd())
+sys.path.append("../")
+app = Flask(__name__)
 
 
-# functions to get menus / menu info
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    model.session.remove()
 
 
-def count_menus_by_year(year):
-    menu_list = find_menus_by_year(year)
-    return len(menu_list)
+@app.route("/")
+def index():
+    # generate counts for main chart of menus by decade
+    decade_list = helper.counts_for_all_decades()
+    menu_total = helper.get_total_menus()
+    item_total = helper.get_total_dishes()
+    restaurant_total = helper.get_total_restaurants()
+    return render_template("index.html", decade_list=decade_list, 
+                                         menu_total=menu_total,
+                                         restaurant_total=restaurant_total,
+                                         item_total=item_total)
 
 
-def count_menus_by_decade(year):
-    total = 0
-    endyear = year + 10
-    while year < endyear:
-        total += count_menus_by_year(year)
-        year += 1
-    return total
+@app.route("/about")
+def about():
+    return render_template("about.html")
 
 
-def count_menus_by_years(year):
-# input is starting year of decade (i.e. 1960 for 1960s)
-    counts = {}
-    endyear = year + 10
-    while year < endyear:
-        count = count_menus_by_year(year)
-        counts[year] = count
-        year += 1
-    return counts
-
-
-def counts_for_all_years(startyear):
-# for chart dislay: return list of lists of (year, count) for decade
-# indicated by stopyear.
-    endyear = startyear + 10
-    yearlist = [['Year', 'link', 'Menu Count']] 
-    for year in range(startyear, endyear):
-        count = count_menus_by_decade(year)
-        link = '../year/%s' % str(year)
-        yearlist.append([str(year), link, count])
-    return yearlist
-
-
-def counts_for_all_decades():
-# for chart dislay: return list of lists of (decade, count)
-    decade_list = [['Decade', 'link', 'Menu Count']] 
-    for year in range(1850, 2010, 10):
-        link = '../decade/%s' % str(year)
-        count = count_menus_by_decade(year)
-        decade_list.append([str(year), link, count])
-    return decade_list
-
-
-def find_menus_by_year(year, limit=False):
-    if (limit is not False) and (type(limit) == int):
-        menus = model.session.query(model.Menu).filter(
-            model.Menu.date >= datetime(year, 1, 1)).filter(
-            model.Menu.date <= datetime(year, 12, 31)).limit(limit)
+@app.route("/random/<selection>")
+def get_random(selection):
+    if selection == 'menu':
+        menu = helper.get_random_menu()
+        return redirect('../menu/' + str(menu.id))
+    elif selection == 'restaurant':
+        restaurant = helper.get_random_restaurant()
+        return redirect('../restaurant/' + str(restaurant.id))
     else:
-        menus = model.session.query(model.Menu).filter(
-            model.Menu.date >= datetime(year, 1, 1)).filter(
-            model.Menu.date <= datetime(year, 12, 31)).all()
-    return menus
+        item = helper.get_random_dish()
+        return redirect('../item/' + str(item.id))
 
 
-def find_menus_by_decade(year, limit=False):
-    endyear = year + 10
-    menu_list = []
-    for year in range(year, endyear):
-        menus = find_menus_by_year(year)
-        for menu in menus:
-            menu_list.append(menu)
-            print menu
-    return menu_list
+@app.route("/item/<int:item_id>")
+def item_details(item_id):
+    item = model.session.query(model.Item).get(item_id)
+    menus = item.get_menus_date_sorted()
+    menu_count = len(menus)
+    similarities = helper.get_similar_dishes(item_id)
+    if similarities == []:
+        similarities = ['no similar items found']
+    techniques = helper.get_techniques_for_dish(item_id)
+    categories = helper.get_categories_for_dish(item_id)
+    return render_template("item.html", item=item, 
+                                        menus=menus,
+                                        similarities=similarities,
+                                        techniques=techniques,
+                                        count=menu_count,
+                                        categories=categories)
 
 
-def get_total_menus():
-    count = model.session.query(model.Menu).count()
-    return count
+@app.route("/menu/<int:menu_id>")
+def menu_details(menu_id):
+    menu = model.session.query(model.Menu).get(menu_id)
+    items = []
+    for i in menu.items:
+        items.append((i.item, i.stringprice))
+    item_count = len(items)
+    menus = menu.restaurant.menus
+    menu_count = len(menus)
+    # similarities = helper.get_similar_menus(menu_id)
+    return render_template("menu.html", menu=menu, 
+                                        items=items, 
+                                        menus=menus,
+                                        item_count=item_count,
+                                        # similarities=similarities,
+                                        menu_count=menu_count)
 
 
-def get_random_menu():
-    count = get_total_menus()
-    num = randint(12463, count+12463)
-    menu = model.session.query(model.Menu).get(num)
-    if menu == None:
-        menu = get_random_menu()
-    return menu
+@app.route("/restaurant/<int:restaurant_id>")
+def restaurant_details(restaurant_id):
+    restaurant = model.session.query(model.Restaurant).get(restaurant_id)
+    menu_count = len(restaurant.menus)
+    menus = restaurant.get_menus_date_sorted()
+    return render_template("restaurant.html", restaurant=restaurant,
+                                              menus=menus, 
+                                              count=menu_count)
 
 
-def get_similar_menus(menu_id):
-# return list of dishes that are most similar to <dish>
-    key  = ('menu_similarities:' + str(menu_id))
-    results = model.r.lrange(key, 0, -1)
-    results_by_score = [(s[1], s[0]) for s in results]
-    sorted_by_score = sorted(results_by_score)
-    results = [s[1] for s in sorted_by_score]
-    return results
+@app.route("/technique/<technique>")
+def technique_details(technique):
+    dishes = helper.find_dishes_by_technique(technique, limit=50)
+    count = len(dishes)
+    return render_template("technique.html", technique=technique,
+                                             dishes=dishes,
+                                             count=count)
 
 
-# functions to get restaurants / restautant info
+@app.route("/category/<category>")
+def category_details(category):
+    dishes = helper.find_dishes_by_category(category, limit=50)
+    count = len(dishes)
+    return render_template("category.html", category=category,
+                                            dishes=dishes,
+                                            count=count)
 
 
-def find_restaurant_by_name(name):
-    restaurants = model.session.query(model.Restaurant).filter(
-                    model.Restaurant.name.like('%' + name + '%')).all()
-    if restaurants == []:
-        restaurants = ['no results found']
-    return restaurants
+
+@app.route("/explore_techniques")
+def explore_techniques():
+    results = helper.find_dishes_select_techniques()
+    return render_template("explore_techniques.html", results=results)
 
 
-def location_same_as_name(restaurant):
-    return restaurant.name == restaurant.location
+@app.route('/explore_categories')
+def explore_categories():
+    results = helper.find_dishes_select_categories()
+    return render_template("explore_categories.html", results=results)
 
 
-def get_total_restaurants():
-    count = model.session.query(model.Restaurant).count()
-    return count
+@app.route('/decade_results/')
+def decade_results():
+    decade = str(request.args.get('decade'))
+    return redirect('/decade/' + decade)
 
 
-def get_random_restaurant():
-    count = get_total_menus()
-    num = randint(1, count+1)
-    restaurant = model.session.query(model.Restaurant).get(num)
-    if restaurant == None:
-        restaurant = get_random_restaurant()
-    return restaurant
+@app.route('/decade/<int:decade>')
+def decade_display(decade):
+    yearlist = helper.counts_for_all_years(decade)
+    popular = helper.get_popular_dishes_decade(decade)
+    print popular
+    return render_template('decade.html', popular=popular,
+                                          decade=decade,
+                                          yearlist=yearlist)
 
 
-# functions to get dishes / dish info
+@app.route('/year/<int:year>')
+def year_display(year):
+    menu_count = helper.count_menus_by_year(year)
+    item_count = helper.total_dishes_per_year(year)
+    popular = helper.get_popular_dishes_year(year)
+    menus = helper.find_menus_by_year(year, limit=50)
+    return render_template('year.html', year=year,
+                                        menu_count=menu_count,
+                                        item_count = item_count,
+                                        menus=menus,
+                                        popular = popular)
 
 
-def find_dishes_by_keyword(keyword, limit=False):
-    if (limit is not False) and (type(limit) == int):
-        dishes = model.session.query(model.Item).filter(
-            model.Item.description.like('%' + keyword + '%')).limit(limit)
-    else:
-        dishes = model.session.query(model.Item).filter(
-                    model.Item.description.like('%' + keyword + '%')).all()
-    if dishes == []:
-        dishes = ['no results found']
-    return dishes
+@app.route('/item_results')
+def item_results():
+    keyword = request.args.get('search')
+    keyword_cap = keyword.capitalize()
+    results = helper.find_dishes_by_keyword(keyword_cap)
+    count = len(results)
+    print results
+    return render_template("item_results.html", keyword=keyword, 
+                                                results=results,
+                                                count=count)
 
 
-def find_dishes_by_technique(technique, limit=False):
-    key = ('technique_items:') + technique
-    if (limit is not False) and (type(limit) == int):
-        items = model.r.lrange(key, 0, limit-1)
-    else: 
-        items = model.r.lrange(key, 0, -1)
-    dishes = []
-    for item in items:
-        item_id = int(item)
-        dish = model.session.query(model.Item).get(item_id)
-        dishes.append(dish)
-    return dishes
+@app.route("/restaurant_results")
+def restaurant_results():
+    keyword = request.args.get("search")
+    results = helper.find_restaurant_by_name(keyword)
+    if results == False:
+        results = ['No results found']
+    count = len(results)
+    print results
+    return render_template("restaurant_results.html", keyword=keyword, 
+                                                results=results,
+                                                count=count)
+
+if __name__ == "__main__":
+    app.run(debug=True, threaded=True)  # turn off debug in production!
 
 
-def find_dishes_select_categories():
-# for use on Explore Categories page
-# for each category in categories, returns a tuple with
-# category name, count of dishes in category, and three dishes
-# in that category.
-    categories =    {'Breakfast': 0,
-                     'Dessert': 0,
-                     'Fruit': 0,
-                     'Fruit': 0,
-                     'Meat': 0,
-                     'Poultry': 0,
-                     'Pasta': 0,
-                     'Seafood': 0,
-                     'Soup': 0,
-                     'Vegetable': 0,
-                    }
+########
 
-    results = []
-    for category in categories.keys():
-        category_lowercase = category.lower()
-        dishes = find_three_dishes_by_category(category_lowercase)
-        print dishes
-        results.append((category, dishes))
-    return results
+# error handlers (from Flask megatutorial):
+#
+# @app.errorhandler(404)
+# def internal_error(error):
+#     return render_template('404.html'), 404
+# @app.errorhandler(500)
+# def internal_error(error):
+#     db.session.rollback()
+#     return render_template('500.html'), 500
 
-
-def find_three_dishes_by_category(category):
-    key = ('category_items:' + category)
-    length = len(model.r.lrange(key, 0, -1))
-    seed = randint(0, length)
-    items = model.r.lrange(key, seed, seed+2)
-    dishes = []
-    for item in items:
-        item_id = int(item)
-        dish = model.session.query(model.Item).get(item_id)
-        dishes.append(dish)
-    return dishes
-
-
-def find_dishes_select_techniques():
-# for use on Explore Techniques page
-# for each technique in techniques, returns a tuple with
-# technique name, count of dishes in technique, and three dishes
-# in that technique.
-    techqniues =    {'Braised': 0,
-                     'Boiled': 0,
-                     'Broiled': 0,
-                     'Carmelized': 0,
-                     'Coddled': 0,
-                     'Deviled': 0,
-                     'Fried': 0,
-                     'Mashed': 0,
-                     'Poached': 0,
-                     'Sauteed': 0,
-                     'Steamed': 0,
-                     'Stuffed': 0,
-                     'Toasted': 0,
-                     'Whipped': 0
-                    }
-
-    results = []
-    for technique in techqniues.keys():
-        technique_lowercase = technique.lower()
-        dishes = find_three_dishes_by_technique(technique_lowercase)
-        results.append((technique, dishes))
-    return results
-
-
-def find_three_dishes_by_technique(technique):
-    key = ('technique_items:' + technique)
-    length = len(model.r.lrange(key, 0, -1))
-    seed = randint(0, length)
-    items = model.r.lrange(key, seed, seed+2)
-    dishes = []
-    for item in items:
-        item_id = int(item)
-        dish = model.session.query(model.Item).get(item_id)
-        dishes.append(dish)
-    return dishes
-
-
-def find_dishes_by_category(category, limit=False):
-    key = ('category_items:') + category
-    if (limit is not False) and (type(limit) == int):
-        items = model.r.lrange(key, 0, limit-1)
-    else: 
-        items = model.r.lrange(key, 0, -1)
-    dishes = []
-    for item in items:
-        item_id = int(item)
-        dish = model.session.query(model.Item).get(item_id)
-        dishes.append(dish)
-    return dishes
-
-
-def get_techniques_for_dish(item_id):
-    key = ('item_techniques:') + str(item_id)
-    techniques = model.r.lrange(key, 0, -1)
-    return techniques
-
-
-def get_categories_for_dish(item_id):
-    key = ('item_categories:' + str(item_id))
-    categories = model.r.lrange(key, 0, -1)
-    return categories
-
-
-def count_dish_by_year(dish, year):
-# return count of how frequently a dish appears in given year.
-    count = 0
-    for i in dish.menus:
-        date = i.menu.date
-        print date
-        if (date >= datetime(year, 1, 1)) and (
-                date <= datetime(year, 12, 31)):
-            count += 1
-            print count
-    return count
-
-
-def total_dishes_per_year(year):
-# not unique; total number of menu items per year
-    count = 0
-    menus = find_menus_by_year(year)
-    for menu in menus:
-        count += menu.count_items()
-    return count
-
-
-def dish_frequency_by_year(dish, year):
-    dish_total = float(count_dish_by_year(dish, year))
-    year_total = float(total_dishes_per_year())
-    if year_total != 0:
-        return dish_total / year_total
-    else:
-        return 0
-
-
-def count_dish_by_decade(dish, year):
-    endyear = year + 10
-    count = 0
-    for year in range (year, endyear):
-        count += count_dish_by_year(count, year)
-    return count
-
-
-def total_dishes_per_decade(year):
-    total = 0
-    endyear = year + 10
-    for year in range(year, endyear):
-        total += total_dishes_per_year(year)
-    return total
-
-
-def get_popular_dishes_year(year):   
-    results = model.r.lrange(('popular_year:' + str(year)), 0, -1)
-    popular_items = []
-    for result in results:
-        item_id = int(result)
-        item = model.session.query(model.Item).get(item_id)
-        popular_items.append(item)
-    return popular_items
-
-
-def get_popular_dishes_decade(decade):   
-    results = model.r.lrange(('popular_decade:' +str(decade)), 0, -1)
-    popular_items = []
-    for result in results:
-        item_id = int(result)
-        item = model.session.query(model.Item).get(item_id)
-        popular_items.append(item)
-    return popular_items
-
-
-def get_similar_dishes(dish_id):
-# return list of dishes that are most similar to <dish>
-    key = 'item_similarities:' + str(dish_id)
-    print key
-    matches = model.r.lrange(key, 0, -1)
-    print matches
-    if matches == []:
-        similar_dishes = []
-    else:
-        similar_dishes = []
-        for item_id in matches:
-            item_id = int(item_id)
-            item = model.session.query(model.Item).get(item_id)
-            similar_dishes.append(item)
-    return similar_dishes
-
-
-def get_total_dishes():
-    count = model.session.query(model.Item).count()
-    return count
-
-
-def get_random_dish():
-    count = get_total_dishes()
-    num = randint(1, count)
-    dish = model.session.query(model.Item).get(num)
-    if dish == None:
-        dish = get_random_dish()
-    return dish
-
-
+# http://blog.miguelgrinberg.com/post/
+# the-flask-mega-tutorial-part-vii-unit-testing

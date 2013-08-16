@@ -18,8 +18,8 @@
     </ul>
     <p>Date of first appearance: {{ item.firstdate }}</p>
     <p>Date of latest appearance: {{ item.lastdate }} </p>
-    <p>Lowest price: ${{ item.prices[0] }} </p>
-    <p>Highest price: ${{ item.prices[-1] }}</p>
+    <p>Lowest price: {{ item.lowprice }} </p>
+    <p>Highest price: {{ item.highprice }}</p>
     <h3>Menus on which this dish appears ({{ count }} total):</h3>
     <ul>
     {% for menu in menus %}

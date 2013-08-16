@@ -3,6 +3,9 @@ import cdecimal
 from data_processing import build_dish_corpus, build_menu_corpus
 
 
+# Python implementaton of basic all-pairs algorithm using cosine similiary
+# from 2007 paper by Bayardo et. al.: 
+# http://www.bayardo.org/ps/www2007.pdf
 
 ## main all pairs function
 
@@ -32,7 +35,7 @@ def find_matches(item_id, sqrt_of_vsize, index, corpus, t):
     matches = []
     # pairs w their cosine similarity score where score > threshold
     a = {} 
-    # dict is holding place for compared pairs and their calculated dot products
+    # dict is holding place for compared pairs w their calculated dot products
     words = corpus[item_id]
     for word in words:
         if word in index.keys():  # if word has been seen before
@@ -56,24 +59,6 @@ def find_matches(item_id, sqrt_of_vsize, index, corpus, t):
         if score >= t:
             matches.append((compared_item, score))
     return matches
-
-
-# def find_matches(item_id, index, corpus, t):
-#     matches = []
-#     a = {}
-#     words = corpus[item_id]
-#     for word in words:
-#         weight = (cdecimal.Decimal(1) / (len(words)))
-#         if word in index.keys():  # if word has been seen before
-#             appearances = index[word] 
-#             for item in appearances:  # each item = (item_id, decimal)
-#                 if item[0] != item_id:  # don't cmp items to themselves
-#                     a.setdefault(item[0], 0)
-#                     a[item[0]] += (item[1] * weight)
-#     for item_id, score in a.items():
-#         if score >= t:
-#             matches.append((item_id, item[0]))
-#     return matches
 
 
 def match_dictionary_for_db(results):

@@ -5,12 +5,12 @@
 {% block content %}
     <h1>Restaurant details for {{ restaurant.name }}</h1>
     <p>Location info: {{ restaurant.location }}</p>
-<!--     <p>Earliest menu date: {{ menus[0].datestring }}</p>
-    <p>Latest menu date: {{ menus[-1].datestring }}</p> -->
+    <p>Earliest menu date: {{ restaurant.firstdate }}</p>
+    <p>Latest menu date: {{ restaurant.lastdate }}</p>
     <h2>Menus from this restaurant ({{ count }} total):</h2>
     <ul>
     {% for menu in menus %}
-        <li><a href="../menu/{{ menu.id }}">{{ menu.datestring }}</a></li>
+        <li><a href="../menu/{{ menu[1].id }}">{{ menu[1].datestring }}</a></li>
     {% endfor %}
     </ul>
 {% endblock %}
