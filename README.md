@@ -5,7 +5,8 @@ More information at http://aimeecodes.blogspot.com/2013/07/project-plan-reveal.h
 
 Technologies: Python, Postgresql, Redis, NLTK, Flask, SQLAlchemy, Bootstrap.
 
-IMPORT TOOLS
+## Import Tools
+
 (For importing data from NYPL's CSV files)
 
 data_import.py: Imports information on menus, items, and restaurants
@@ -13,7 +14,8 @@ data_import.py: Imports information on menus, items, and restaurants
 menuitems_import.py: For creating links between menus and items. Generates a CSV file for copying into postgres database.
 
 
-DATA PROCESSING TOOLS
+## Data Processing Tools
+
 (Run in interactive mode to generate and persist information about the dataset.)
 
 restaurant_dedup.py: Cleans up Restaurants database table by identifying and merging duplicate entries.
@@ -30,7 +32,7 @@ lexicon.py: Sets up lexicons used by the classifier. Lexicon lists are stored as
 model.py: Defines classes for restaurants, 
 
 
-FRONT END
+## Front End
 
 controller.py: Handlers for web requests. Requires model.py and helper.py.
 
