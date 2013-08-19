@@ -5,6 +5,10 @@ More information at http://aimeecodes.blogspot.com/2013/07/project-plan-reveal.h
 
 Technologies: Python, Postgresql, Redis, NLTK, Flask, SQLAlchemy, Bootstrap.
 
+## Summary
+
+Menu Scout: a web app that allows users to explore 150 years of culinary history via data from the New York Public Library's "What's on the Menu?" project. The short version: NYPL is digitizing their collection of 45,000+ historical restaurant menus, putting the scans on their web site, and asking the food-loving public to help provide text transcriptions. All the transcriptions completed to date are available for download. It's a fascinating, but messy, data set. On the back end, Menu Scout uses data analysis and natural language processing techniques to provide users with new ways to search and browse this unique historical resource.
+
 ## Import Tools
 
 (For importing data from NYPL's CSV files)
