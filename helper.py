@@ -2,6 +2,7 @@ import model
 from datetime import datetime
 from random import randint
 
+# helper functions called by data_processing and controller functions.
 
 # functions to get menus / menu info
 
@@ -11,7 +12,8 @@ def count_menus_by_year(year):
     return len(menu_list)
 
 
-def count_menus_by_decade(year):
+def total_menus_per_decade(year):
+# count all menus from the decade that starts with year
     total = 0
     endyear = year + 10
     while year < endyear:
@@ -21,6 +23,7 @@ def count_menus_by_decade(year):
 
 
 def count_menus_by_years(year):
+# get yearly counts of menus for all years in a decade.
 # input is starting year of decade (i.e. 1960 for 1960s)
     counts = {}
     endyear = year + 10
@@ -32,24 +35,27 @@ def count_menus_by_years(year):
 
 
 def counts_for_all_years(startyear):
-# for chart dislay: return list of lists of (year, count) for decade
-# indicated by stopyear.
+# for chart dislay: return list of lists of (year, menu_count, item_count) 
+# for decade indicated by stopyear.
     endyear = startyear + 10
     yearlist = [['Year', 'link', 'Menu Count']] 
     for year in range(startyear, endyear):
-        count = count_menus_by_decade(year)
         link = '../year/%s' % str(year)
-        yearlist.append([str(year), link, count])
+        key = "year_count_menus:%s" % str(year)
+        count = model.r.get(key)
+        yearlist.append([str(year), link, int(count)])
     return yearlist
 
 
 def counts_for_all_decades():
-# for chart dislay: return list of lists of (decade, count)
     decade_list = [['Decade', 'link', 'Menu Count']] 
     for year in range(1850, 2010, 10):
         link = '../decade/%s' % str(year)
-        count = count_menus_by_decade(year)
-        decade_list.append([str(year), link, count])
+        key = 'decade_count_menus:%s' % str(year)
+        print key
+        count = model.r.get(key)
+        decade_list.append([str(year), link, int(count)])
+        print decade_list
     return decade_list
 
 
@@ -66,13 +72,13 @@ def find_menus_by_year(year, limit=False):
 
 
 def find_menus_by_decade(year, limit=False):
+# find all menus for the decade that starts with year.
     endyear = year + 10
     menu_list = []
     for year in range(year, endyear):
         menus = find_menus_by_year(year)
         for menu in menus:
             menu_list.append(menu)
-            print menu
     return menu_list
 
 
@@ -185,6 +191,7 @@ def find_dishes_select_categories():
 
 
 def find_three_dishes_by_category(category):
+# used for Explore Categories page display
     key = ('category_items:' + category)
     length = len(model.r.lrange(key, 0, -1))
     seed = randint(0, length)
@@ -227,6 +234,7 @@ def find_dishes_select_techniques():
 
 
 def find_three_dishes_by_technique(technique):
+# used for Explore Techniques page display
     key = ('technique_items:' + technique)
     length = len(model.r.lrange(key, 0, -1))
     seed = randint(0, length)
@@ -288,6 +296,8 @@ def total_dishes_per_year(year):
 
 
 def dish_frequency_by_year(dish, year):
+# calculate number of times dish appears in a year divided by
+# total number of dishes for that year.
     dish_total = float(count_dish_by_year(dish, year))
     year_total = float(total_dishes_per_year())
     if year_total != 0:
@@ -333,7 +343,7 @@ def get_popular_dishes_decade(decade):
 
 
 def get_similar_dishes(dish_id):
-# return list of dishes that are most similar to <dish>
+# return list of dishes that are most similar to a given dish.
     key = 'item_similarities:' + str(dish_id)
     print key
     matches = model.r.lrange(key, 0, -1)

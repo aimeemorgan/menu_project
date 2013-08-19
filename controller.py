@@ -3,10 +3,7 @@
 from flask import Flask, render_template, redirect, request
 import model
 import helper
-import os, sys
 
-sys.path.append(os.getcwd())
-sys.path.append("../")
 app = Flask(__name__)
 
 
@@ -133,7 +130,6 @@ def decade_results():
 def decade_display(decade):
     yearlist = helper.counts_for_all_years(decade)
     popular = helper.get_popular_dishes_decade(decade)
-    print popular
     return render_template('decade.html', popular=popular,
                                           decade=decade,
                                           yearlist=yearlist)
@@ -158,7 +154,6 @@ def item_results():
     keyword_cap = keyword.capitalize()
     results = helper.find_dishes_by_keyword(keyword_cap)
     count = len(results)
-    print results
     return render_template("item_results.html", keyword=keyword, 
                                                 results=results,
                                                 count=count)
@@ -171,7 +166,6 @@ def restaurant_results():
     if results == False:
         results = ['No results found']
     count = len(results)
-    print results
     return render_template("restaurant_results.html", keyword=keyword, 
                                                 results=results,
                                                 count=count)

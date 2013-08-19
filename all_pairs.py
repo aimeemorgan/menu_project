@@ -35,13 +35,12 @@ def find_matches(item_id, sqrt_of_vsize, index, corpus, t):
     matches = []
     # pairs w their cosine similarity score where score > threshold
     a = {} 
-    # dict is holding place for compared pairs w their calculated dot products
+    # dict a is holding place for compared pairs w their calculated dot products
     words = corpus[item_id]
     for word in words:
         if word in index.keys():  # if word has been seen before
             # find all other items whose description contain that word
             appearances = index[word] 
-            #print "APPEARANCES:", appearances
             # dictionary: word as key, list of (item_ids, sqrt_of_vsize) as value
             for item in appearances:
             # each item = (item_id = item[0], sqrt_of_vsize = item[1]) 

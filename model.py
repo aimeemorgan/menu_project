@@ -18,8 +18,6 @@ r = redis.StrictRedis(host='localhost', port=6379, db=0)
 Base = declarative_base()
 Base.query = session.query_property()
 
-### Class declarations go here 
-# restaurant = session.query(Restaurant).get(12882)
 
 class Restaurant(Base):
     __tablename__ = "restaurants"
