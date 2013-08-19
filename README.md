@@ -1,4 +1,6 @@
-Hackbright final project using the New York Public Library's "What's on the Menu?" dataset (http://menus.nypl.org/). 
+# Menu Scout
+
+[Hackbright Academy] (http://www.hackbrightacademy.com) final project using the New York Public Library's "What's on the Menu?" dataset (http://menus.nypl.org/). 
 More information at http://aimeecodes.blogspot.com/2013/07/project-plan-reveal.html.
 
 Technologies: Python, Postgresql, Redis, NLTK, Flask, SQLAlchemy, Bootstrap.
