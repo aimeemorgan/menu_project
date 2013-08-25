@@ -291,3 +291,12 @@ def persist_year_counts_for_chart():
     model.r.save
 
 
+def persist_total_dishes_all_years():
+# generate and save counts of total dishes for
+# each year in the dataset. for use in chart on main page of site.
+    for year in range (1850, 2011):
+        count = helper.total_dishes_per_year(year)
+        print year, count
+        key = ('year_count_dishes:%s') % year
+        model.r.set(key, count)
+    model.r.save

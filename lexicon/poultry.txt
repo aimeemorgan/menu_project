@@ -12,9 +12,3 @@ hen
 ostrich
 guineafowl
 capon
-loin
-tenderloin
-charcuterie
-pate
-prociutto
-pancetta

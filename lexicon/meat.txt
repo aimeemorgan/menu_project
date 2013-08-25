@@ -43,6 +43,12 @@ ham
 salami
 liverwurst
 head cheese
+loin
+tenderloin
+charcuterie
+pate
+prociutto
+pancetta
 
 
 

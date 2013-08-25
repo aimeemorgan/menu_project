@@ -138,7 +138,7 @@ def decade_display(decade):
 @app.route('/year/<int:year>')
 def year_display(year):
     menu_count = helper.count_menus_by_year(year)
-    item_count = helper.total_dishes_per_year(year)
+    item_count = helper.get_item_count_by_year(year)
     popular = helper.get_popular_dishes_year(year)
     menus = helper.find_menus_by_year(year, limit=50)
     return render_template('year.html', year=year,
@@ -161,7 +161,7 @@ def item_results():
 
 @app.route("/restaurant_results")
 def restaurant_results():
-    keyword = request.args.get("search")
+    keyword = request.args.get('search')
     results = helper.find_restaurant_by_name(keyword)
     if results == False:
         results = ['No results found']

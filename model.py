@@ -4,7 +4,7 @@ import locale
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Float, create_engine, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref, scoped_session
-from titlecase import titlecase
+#from titlecase import titlecase
 
 engine = create_engine('postgresql+psycopg2://alm:password@localhost/menus2')
 # for heroku deploy, will need to modify this to point to DATABASE_URL.
@@ -203,7 +203,7 @@ class Item(Base):
 
     @property
     def name(self):
-        name = titlecase(self.description)
+        name = self.description
         return name
 
     @property

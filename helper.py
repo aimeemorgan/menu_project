@@ -52,10 +52,8 @@ def counts_for_all_decades():
     for year in range(1850, 2010, 10):
         link = '../decade/%s' % str(year)
         key = 'decade_count_menus:%s' % str(year)
-        print key
         count = model.r.get(key)
         decade_list.append([str(year), link, int(count)])
-        print decade_list
     return decade_list
 
 
@@ -185,7 +183,6 @@ def find_dishes_select_categories():
     for category in categories.keys():
         category_lowercase = category.lower()
         dishes = find_three_dishes_by_category(category_lowercase)
-        print dishes
         results.append((category, dishes))
     return results
 
@@ -278,11 +275,9 @@ def count_dish_by_year(dish, year):
     count = 0
     for i in dish.menus:
         date = i.menu.date
-        print date
         if (date >= datetime(year, 1, 1)) and (
                 date <= datetime(year, 12, 31)):
             count += 1
-            print count
     return count
 
 
@@ -332,6 +327,11 @@ def get_popular_dishes_year(year):
     return popular_items
 
 
+def get_item_count_by_year(year):
+    key = 'year_count_dishes:%s' % str(year)
+    return model.r.get(key)
+
+
 def get_popular_dishes_decade(decade):   
     results = model.r.lrange(('popular_decade:' +str(decade)), 0, -1)
     popular_items = []
@@ -345,9 +345,7 @@ def get_popular_dishes_decade(decade):
 def get_similar_dishes(dish_id):
 # return list of dishes that are most similar to a given dish.
     key = 'item_similarities:' + str(dish_id)
-    print key
     matches = model.r.lrange(key, 0, -1)
-    print matches
     if matches == []:
         similar_dishes = []
     else:
