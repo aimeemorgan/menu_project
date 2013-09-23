@@ -1,7 +1,7 @@
-import model
+import webapp.model as model
+import webapp.helper as helper
 import nltk
 import re
-import helper
 from nltk.corpus import stopwords
 #from lexicon import lexicon_names, lexicon_setup
 

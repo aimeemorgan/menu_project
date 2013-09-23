@@ -1,4 +1,4 @@
-import model
+import webapp.model as model
 from nltk.stem import PorterStemmer
 from lexicon import lexicon_names
 from data_processing import build_dish_corpus

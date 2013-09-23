@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block head %}
+  <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var decadeList = {{ decade_list|safe }};
+        var data = google.visualization.arrayToDataTable(
+          decadeList
+          );
+
+       var view = new google.visualization.DataView(data);
+       view.setColumns([0, 2]);
+
+        var options = {
+          title: 'Menu Count by Decade',
+          hAxis: {title: 'Decade', titleTextStyle: {color: 'blue'}}
+        };
+
+        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        chart.draw(view, options);
+
+        var selectHandler = function(e) {
+          window.location = data.getValue(chart.getSelection()[0]['row'], 1 );
+       }
+
+       google.visualization.events.addListener(chart, 'select', selectHandler);
+      }
+      </script>
+{% endblock %}
+{% block content %}
+    <p>Explore culinary history via the New York Public Library's "What's on the Menu" dataset</p>
+    <div class="panel">
+    <h2 class="panel-title">Current Stats</h2>
+    <ul>
+      <li>Total menu items: {{ item_total }}</li>
+      <li>Total menus: {{ menu_total }}</li>
+      <li>Total unique restaurants: {{ restaurant_total }}</li>
+    </ul> 
+    </div>
+    <div id="chart_div" style="width: 1100px; height: 400px;"></div>
+    <h2>Search the collection</h2>
+    <p>Search by keyword in descriptions of menu items:<br/><form action="/item_results">
+      <input type="text" name="search"><input type="submit"></form></p>
+    <p>Search by keyword in restaurant names:<br/> <form action="/restaurant_results"><input type="text" name="search" /><input type="submit"></form></p>
+  {% endblock %}
+

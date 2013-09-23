@@ -1,4 +1,4 @@
-import model
+from app import model
 import csv
 import datetime
 

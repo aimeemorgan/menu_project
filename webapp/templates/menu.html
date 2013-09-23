@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block head %}
+<title>Menu Scout: menu details</title>
+{% endblock %}
+{% block content %}
+    <h1>Menu details for menu #{{ menu.id }}</h1>
+    <p>Restaurant: <a href="../restaurant/{{ menu.restaurant.id }}">{{ menu.restaurant.name }}</a></p> 
+    <p>Menu date: {{ menu.datestring }}</p>
+    <h2>Items on this menu ({{ item_count }} total)</h2>
+    <table class="table table-striped table-condensed" width="75%">
+        <thead>
+            <td width="60%">Item</td>
+            <td>Price (if known)</td>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr>
+                    <td><a href="../item/{{ item[0].id }}">{{ item[0].name }}</td>
+                    <td>{{ item[1] }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h2>Other menus from the same restaurant ({{ menu_count }} total):</h2>
+    <ul>
+    {% for menu in menus %}
+        <li><a href="../menu/{{ menu.id }}">{{ menu.restaurant.name }}, {{ menu.datestring }}</a></li>
+    {% endfor %}
+    </ul>
+{% endblock %}

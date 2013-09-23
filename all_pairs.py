@@ -1,4 +1,4 @@
-import model
+import webapp.model as model
 import cdecimal
 from data_processing import build_dish_corpus, build_menu_corpus
 

@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block head %}
+<title>Menu Scout: explore by techniques</title>
+{% endblock %}
+{% block content %}
+<h2>Explore by Cooking Technique</h2>
+<p>Note: categorization of menu items by technique is an experimental feature. Some techniques
+	assigned to items may not be accurate. You can report these to menuscout AT gmail.com.</p>
+<table class="table">
+	<thead>
+		<td width="35%">Technique (click on name to see all items)</td><td>Sample items</td>
+	</thead>
+		<tbody>
+		{% for technique in results %}
+		<tr>
+			<td>
+			<a href="../technique/{{ technique[0].lower() }}">{{ technique[0] }}</a></td>
+			<td><ul>
+				{% for dish in technique[1] %}
+				<li><a href="../item/{{ dish.id }}">{{ dish.name}}</a>
+				{% endfor %}
+				<li><a href="../technique/{{ technique[0].lower() }}">more...</a></li>
+			</ul></td>
+		</tr>
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}
+{% block footer %}
+{% endblock %}

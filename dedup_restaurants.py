@@ -1,4 +1,4 @@
-import model
+import webapp.model as model
 
 #For all duplicate NAMEs in restaurants:
 #make the one with the lowest id number the canonical version
