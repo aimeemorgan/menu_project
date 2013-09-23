@@ -1,8 +1,8 @@
 import model
 import helper
-from flask import Flask, render_template, redirect, request
+from webapp import app
+from flask import render_template, redirect, request
 
-app = Flask(__name__)
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):

@@ -1,10 +1,12 @@
 import redis
 import locale
+import flask.ext.whooshalchemy as whooshalchemy
 
 from config import DATABASE_URL, REDIS_HOST, REDIS_PORT, REDIS_DB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Float, create_engine, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship, backref, scoped_session
+from webapp import app
 
 engine = create_engine(DATABASE_URL)
 
@@ -20,6 +22,7 @@ Base.query = session.query_property()
 
 class Restaurant(Base):
     __tablename__ = "restaurants"
+    __searchable__ = ['name']
 
     id = Column(Integer, primary_key=True)
     name = Column(String(256), nullable=False)
@@ -120,14 +123,10 @@ class Menu(Base):
 
 class Item(Base): 
     __tablename__ = "items"
+    __searchable__ = ['description']
 
     id = Column(Integer, primary_key=True)
     description = Column(String, nullable=False)
-    # first_year = Column(DateTime, nullable=True)
-    # latest_year = Column(DateTime, nullable=True)
-    # low_price = Column(Float, nullable=True)
-    # high_price = Column(Float, nullable=True)
-    # category = Column(String, nullable=True)
 
     menus = relationship("MenuItem", backref=backref("items"))
 
@@ -253,7 +252,8 @@ class MenuItem(Base):
         return stringprice
 
 def main():
-    pass
+    whooshalchemy.whoosh_index(app, Restaurant)
+    whooshalchemy.whoosh_index(app, Item)    
 
 if __name__ == "__main__":
     main()

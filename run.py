@@ -1,7 +1,7 @@
-#!../venv/bin/python
+#!venv/bin/python
 
-from config import FLASK_PORT_PROD, FLASK_PORT_DEV, PRODUCTION
-from controller import app
+from webapp.config import FLASK_PORT_PROD, FLASK_PORT_DEV, PRODUCTION
+from webapp import app
 
 
 if __name__ == '__main__':
